@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>pdbonly</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="4.1.0.555618" />
+    <PackageReference Include="Xamarin.Essentials" Version="1.1.0" />
+    <PackageReference Include="SkiaSharp.Views.Forms" Version="1.68.0" />
+    <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
+    <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="livesharp.rules" />
+    <None Remove="Resources\Fonts\Icons.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Extensions\XamarinFormsMarkupExtensions.cs" />
+    <Compile Remove="Controls\_4hGraph.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
+    <Folder Include="Resources\Fonts\" />
+    <Folder Include="Controls\" />
+    <Folder Include="Helpers\" />
+    <Folder Include="Helpers\Constants\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="Controls\_4hGraph.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Fonts\Icons.ttf" />
+  </ItemGroup>
+</Project>

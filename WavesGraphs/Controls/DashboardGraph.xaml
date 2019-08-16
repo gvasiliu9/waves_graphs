@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:helpers="clr-namespace:WavesGraphs.Helpers"
+    xmlns:skia="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms"
+    x:Class="WavesGraphs.Controls.DashboardGraph">
+
+    <ContentView.Content>
+
+            <!--Max value line container-->
+            <!--<StackLayout
+                x:Name="maxValue"
+                Margin="0, 0, 0, 5"
+                Padding="10, 0"
+                VerticalOptions="Start">
+
+                <FlexLayout
+                    AlignContent="Center"
+                    AlignItems="Center"
+                    JustifyContent="Start"
+                    Direction="Row">
+
+                    Ventilation icon
+                    <Label
+                        Margin="0, 0, 10, 0"
+                        FontSize="Large"
+                        TextColor="White"
+                        Text="{x:Static helpers:IconsHelper.Ventilator}"
+                        Style="{StaticResource Key=Icon}"/>
+
+                    Ventilation label
+                    <Label
+                        TextColor="White"
+                        Text="Ventilation"/>
+
+                    Line
+                    <BoxView
+                        Margin="10, 0"
+                        HeightRequest="2"
+                        BackgroundColor="White"
+                        FlexLayout.Grow="1"/>
+
+                    Max percentage
+                    <Label
+                        TextColor="White"
+                        Text="100%"/>
+
+                </FlexLayout>
+
+            </StackLayout>-->
+
+            <!--Graph canvas view-->
+            <AbsoluteLayout>
+
+                <!--Max value line canvas-->
+                <skia:SKCanvasView
+                    x:Name="maxValueCanvas"
+                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                    AbsoluteLayout.LayoutFlags="All"/>
+
+                <!--Hours canvas-->
+                <skia:SKCanvasView
+                    x:Name="hoursCanvas"
+                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                    AbsoluteLayout.LayoutFlags="All"/>
+
+                <!--Graph canvas-->
+                <skia:SKCanvasView
+                    x:Name="graphCanvas"
+                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                    AbsoluteLayout.LayoutFlags="All"/>
+
+            </AbsoluteLayout>
+
+    </ContentView.Content>
+
+</ContentView>
