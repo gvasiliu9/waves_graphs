@@ -19,6 +19,8 @@ namespace WavesGraphs.Controls
         #region Fields
 
         // Bindable properties
+        private GraphValues _graphValues;
+
         private float _maxValue;
 
         private string[] _timeAsString = {
@@ -137,63 +139,58 @@ namespace WavesGraphs.Controls
                 100,
                 100,
                 100,
-                126,
-                126,
-                126,
-                126,
-                100,
-                100,
-                100,
-                100,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
                 100,
                 100,
                 100,
                 100,
                 100,
+                100,
+                100,
+                150,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
+                84,
                 100,
                 100,
                 100,
@@ -207,23 +204,123 @@ namespace WavesGraphs.Controls
                 100,
                 100,
                 100,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                150
+                100,
+                100,
+                100,
+                100,
+                100,
+                80,
+                80,
+                80,
+                80,
+                80,
+                80,
+                80,
+                80,
+                80,
+                80,
+                80
             };
-    
-        private List<GraphValueModel> _graphValues;
 
-        // Text
-        private TextConstants _textConstants;
+        private int?[] _indoorTemperature =
+            {
+                24,
+                24,
+                24,
+                24,
+                24,
+                23,
+                24,
+                23,
+                23,
+                23,
+                24,
+                23,
+                23,
+                24,
+                23,
+                24,
+                23,
+                24,
+                23,
+                24,
+                23,
+                24,
+                25,
+                25,
+                25,
+                25,
+                24,
+                25,
+                25,
+                25,
+                25,
+                25,
+                24,
+                25,
+                25,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                25,
+                26,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                25,
+                26,
+                26,
+                27,
+                27,
+                27,
+                28,
+                27,
+                27,
+                27,
+                27,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                26,
+                null,
+                null
+            };
 
         // Canvas info
         private CanvasInfo _maxValueCanvasInfo;
@@ -231,11 +328,20 @@ namespace WavesGraphs.Controls
         private CanvasInfo _graphCanvasInfo;
 
         // Draw info
+        private TitleDraw _titleDraw;
         private MaxValueDraw _maxValueDraw;
         private GraphDraw _graphDraw;
         private HoursDraw _hoursDraw;
         private CurrentValueIndicatorDraw _currentValueIndicatorDraw;
 
+        private SensorLabelDraw _temperatureLabelDraw;
+        private SensorLabelDraw _vocLabelDraw;
+        private SensorLabelDraw _co2LabelDraw;
+
+        // Text
+        private TextConstants _textConstants;
+
+        private TextDraw _maxValueTextDraw;
         private TextDraw _valueTextDraw;
         private TextDraw _titleTextDraw;
         private TextDraw _iconTextDraw;
@@ -247,8 +353,6 @@ namespace WavesGraphs.Controls
             InitializeComponent();
 
             hoursCanvas.PaintSurface += HoursCanvas_PaintSurface;
-
-            _graphValues = new List<GraphValueModel>();
 
             InitPaints();
 
@@ -265,16 +369,23 @@ namespace WavesGraphs.Controls
         {
             string dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
+            _graphValues = new GraphValues();
+            _graphValues.Last24Hours = new List<GraphValueModel>();
+
             for (int i = 0; i < _timeAsString.Length; i++)
             {
-                _graphValues.Add(new GraphValueModel
+                _graphValues.Last24Hours.Add(new GraphValueModel
                 {
                     DateTime = DateTime.ParseExact(_timeAsString[i], dateFormat, CultureInfo.InvariantCulture),
                     Airflow = _airflow[i] ?? 0
                 });
             }
 
-            _maxValue = _graphValues.Select(v => v.Airflow).Max();
+            // Airflow max value
+            _graphValues.MaxAirflow = _graphValues.Last24Hours.Select(v => v.Airflow).Max();
+
+            // Temperature max malue
+            _graphValues.MaxTemperature = _graphValues.Last24Hours.Select(v => v.Temperature).Max();
         }
 
         /// <summary>
@@ -294,7 +405,24 @@ namespace WavesGraphs.Controls
         /// </summary>
         private void InitPaints()
         {
+            // Sensors
+            _temperatureLabelDraw.LabelPaint = new SKPaint
+            {
+                Color = SKColors.White,
+                IsAntialias = true,
+                Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.IconsFontName)
+            };
+
+            _vocLabelDraw.LabelPaint = _co2LabelDraw.LabelPaint = _temperatureLabelDraw.LabelPaint;
+            _vocLabelDraw.LinePaint = _co2LabelDraw.LinePaint = _temperatureLabelDraw.LinePaint;
+
             // Text
+            _maxValueTextDraw.Paint = new SKPaint
+            {
+                IsAntialias = true,
+                Color = SKColors.White
+            };
+
             _valueTextDraw.Paint = new SKPaint
             {
                 IsAntialias = true,
@@ -305,8 +433,7 @@ namespace WavesGraphs.Controls
             {
                 IsAntialias = true,
                 Color = SKColors.White,
-                FakeBoldText = true,
-                Typeface = SKTypeface.FromFamilyName("Arial")
+                FakeBoldText = true
             };
 
             _iconTextDraw.Paint = new SKPaint
@@ -316,9 +443,16 @@ namespace WavesGraphs.Controls
                 Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.IconsFontName)
             };
 
-            _maxValueDraw.LinePaint = new SKPaint
+            _titleDraw.LinePaint = new SKPaint
             {
                 Style = SKPaintStyle.Stroke,
+                IsAntialias = true,
+                Color = SKColors.White
+            };
+
+            _maxValueDraw.Paint = new SKPaint
+            {
+                Style = SKPaintStyle.Fill,
                 IsAntialias = true,
                 Color = SKColors.White
             };
@@ -365,7 +499,7 @@ namespace WavesGraphs.Controls
             point.Y = _hoursDraw.Bounds.MidY;
 
             // Draw hours circles
-            foreach(var datetime in _graphValues.Select(v => v.DateTime))
+            foreach(var datetime in _graphValues.Last24Hours.Select(v => v.DateTime))
             {
                 if (datetime.Minute != 0)
                     continue;
@@ -405,21 +539,28 @@ namespace WavesGraphs.Controls
 
             path.MoveTo(point);
 
-            float percentage;
+            float percentageFromMaxValue;
+            float lastAirflowPercentage = 0;
 
-            // Get values
-            foreach(var graphValue in _graphValues)
+            // Ordinate
+            foreach(var graphValue in _graphValues.Last24Hours)
             {
+                // Value
                 point.X += (_graphDraw.Step / _graphDraw.Bounds.Right) * _graphDraw.Bounds.Right;
 
-                percentage = ((_maxValue - graphValue.Airflow) / _maxValue);
+                percentageFromMaxValue = ((_maxValue - graphValue.Airflow) / _maxValue);
 
-                if (percentage < 0.80f)
-                    point.Y = (percentage * _graphDraw.Bounds.Bottom) +_graphDraw.Bounds.Top;
+                if (percentageFromMaxValue < 0.80f)
+                    point.Y = (percentageFromMaxValue * _graphDraw.Bounds.Bottom) +_graphDraw.Bounds.Top;
                 else
                     point.Y = _graphDraw.Bounds.Bottom;
 
                 path.LineTo(point);
+
+                lastAirflowPercentage = graphValue.Airflow;
+
+                // Sensors labels
+
             }
 
             // Close graph
@@ -442,7 +583,7 @@ namespace WavesGraphs.Controls
             DrawCurrentValueIndicator(point);
 
             // Draw current value percentage
-            DrawCurrentValuePercentage(point, _graphValues.Last().Airflow);
+            DrawCurrentValuePercentage(point, lastAirflowPercentage);
         }
 
         /// <summary>
@@ -481,12 +622,12 @@ namespace WavesGraphs.Controls
 
         private void DrawTitle()
         {
-            float offsetX = _maxValueDraw.Bounds.Left;
+            float offsetX = _titleDraw.Bounds.Left;
 
             // Icon
             _maxValueCanvasInfo.Canvas.DrawText(_textConstants.Icon,
                 offsetX,
-                _maxValueDraw.Bounds.MidY,
+                (_titleDraw.CenterY) + (_iconTextDraw.Bounds.Height / 2),
                 _iconTextDraw.Paint);
 
             // Title
@@ -494,20 +635,38 @@ namespace WavesGraphs.Controls
 
             _maxValueCanvasInfo.Canvas.DrawText(_textConstants.Title,
                 offsetX,
-                _maxValueDraw.Bounds.MidY,
+                _titleDraw.Bounds.MidY,
                 _titleTextDraw.Paint);
 
             // Line
             offsetX += _titleTextDraw.Bounds.Width + _titleTextDraw.Margin.Right;
 
-            _maxValueCanvasInfo.Canvas.DrawLine(new SKPoint(offsetX, _maxValueDraw.Bounds.MidY + _titleTextDraw.Bounds.MidY),
-                new SKPoint(_maxValueDraw.Bounds.Right, _maxValueDraw.Bounds.MidY + _titleTextDraw.Bounds.MidY),
-                _maxValueDraw.LinePaint);
+            _maxValueCanvasInfo.Canvas.DrawLine(new SKPoint(offsetX, _titleDraw.CenterY),
+                new SKPoint(_titleDraw.Bounds.Right, _titleDraw.CenterY),
+                _titleDraw.LinePaint);
         }
 
         private void DrawMaxValue()
         {
+            // Background
+            if (_maxValue > 100)
+            {
+                _maxValueTextDraw.Paint.Color = SKColors.Transparent;
+                _maxValueTextDraw.Paint.BlendMode = SKBlendMode.Clear;
 
+                _maxValueCanvasInfo.Canvas.DrawRoundRect(_maxValueDraw.Bounds,
+                _maxValueDraw.Radius,
+                _maxValueDraw.Radius,
+                _maxValueDraw.Paint);
+            }
+
+            // Text
+            var point = new SKPoint();
+
+            point.X = _maxValueDraw.Bounds.MidX - Math.Abs(_maxValueTextDraw.Bounds.MidX);
+            point.Y = _maxValueDraw.Bounds.MidY + Math.Abs(_maxValueTextDraw.Bounds.MidY);
+
+            _maxValueCanvasInfo.Canvas.DrawText($"{_maxValue}%", point, _maxValueTextDraw.Paint);
         }
 
         /// <summary>
@@ -517,12 +676,33 @@ namespace WavesGraphs.Controls
         private void Calculate(SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs eventArgs)
         {
             // Constants
-            var _3px = 0;
-            var _5px = 0;
-            var _15px = 0;
-            var _25px = 0;
-            var _30px = 0;
-            var _100px = 0;
+            float screenWidth = eventArgs.Info.Width;
+
+            // Iphone 7 original size
+            var _3px = screenWidth * 0.004f;
+            var _10px = screenWidth * 0.013333333333333f;
+            var _15px = screenWidth * 0.02f;
+            var _25px = screenWidth * 0.033333333333333f;
+            var _30px = screenWidth * 0.04f;
+            var _35px = screenWidth * 0.046666666666667f;
+            var _40px = screenWidth * 0.053333333333333f;
+            var _50px = screenWidth * 0.066666666666667f;
+
+            // Text
+            _valueTextDraw.Paint.TextSize = _25px;
+            _valueTextDraw.Margin.Left = _30px;
+
+            _titleTextDraw.Paint.TextSize = _35px;
+            _titleTextDraw.Margin.Left = _15px;
+            _titleTextDraw.Margin.Right = _25px;
+            _titleTextDraw.Paint.MeasureText(_textConstants.Title, ref _titleTextDraw.Bounds);
+
+            _iconTextDraw.Paint.TextSize = _35px;
+            _iconTextDraw.Paint.MeasureText(_textConstants.Icon, ref _iconTextDraw.Bounds);
+
+            _maxValueTextDraw.Paint.TextSize = _25px;
+
+            _maxValueTextDraw.Paint.MeasureText($"{_maxValue}%", ref _maxValueTextDraw.Bounds);
 
             // Common bounds
             var rightBound = eventArgs.Info.Width * 0.85f;
@@ -530,23 +710,32 @@ namespace WavesGraphs.Controls
             var graphLineAndHoursLineIntersectionBound = eventArgs.Info.Height * 0.95f;
 
             // Max value
-            _maxValueDraw.Bounds.Top = 0;
-            _maxValueDraw.Bounds.Left = 15;
-            _maxValueDraw.Bounds.Bottom = maxValueLinAndGraphLineIntersectionBound;
-            _maxValueDraw.Bounds.Right = rightBound;
+            _titleDraw.Bounds.Top = 0;
+            _titleDraw.Bounds.Left = _15px;
+            _titleDraw.Bounds.Bottom = maxValueLinAndGraphLineIntersectionBound;
+            _titleDraw.Bounds.Right = rightBound;
+
+            _titleDraw.CenterY = _titleDraw.Bounds.MidY - Math.Abs(_titleTextDraw.Bounds.MidY);
+
+            _maxValueDraw.Height = _40px;
+
+            _maxValueDraw.Bounds.Top = _titleDraw.CenterY - (_maxValueDraw.Height / 2);
+            _maxValueDraw.Bounds.Left = rightBound + _15px;
+            _maxValueDraw.Bounds.Bottom = _maxValueDraw.Bounds.Top + _maxValueDraw.Height;
+            _maxValueDraw.Bounds.Right = eventArgs.Info.Width - _10px;
 
             // Graph
-            _graphDraw.Step = rightBound / _graphValues.Count();
+            _graphDraw.Step = rightBound / _graphValues.Last24Hours.Count();
 
             _graphDraw.Bounds.Top = maxValueLinAndGraphLineIntersectionBound;
             _graphDraw.Bounds.Left = 0;
-            _graphDraw.Bounds.Bottom = graphLineAndHoursLineIntersectionBound - 15;
+            _graphDraw.Bounds.Bottom = graphLineAndHoursLineIntersectionBound - _15px;
             _graphDraw.Bounds.Right = rightBound;
 
-            _graphDraw.Paint.PathEffect = SKPathEffect.CreateCorner(50);
+            _graphDraw.Paint.PathEffect = SKPathEffect.CreateCorner(_50px);
 
-            _currentValueIndicatorDraw.Paint.StrokeWidth = 3;
-            _currentValueIndicatorDraw.Radius = 10;
+            _currentValueIndicatorDraw.Paint.StrokeWidth = _3px;
+            _currentValueIndicatorDraw.Radius = _10px;
 
             // Hours
             _hoursDraw.Bounds.Top = graphLineAndHoursLineIntersectionBound;
@@ -555,25 +744,13 @@ namespace WavesGraphs.Controls
             _hoursDraw.Bounds.Right = rightBound;
 
             _hoursDraw.Step = _hoursDraw.Bounds.Width / 24;
-            _hoursDraw.CircleRadius = 3;
+            _hoursDraw.CircleRadius = _3px;
 
-            _hoursDraw.MidnightIndicatorPaint.StrokeWidth = 3;
+            _hoursDraw.MidnightIndicatorPaint.StrokeWidth = _3px;
 
             // Max value
-            _maxValueDraw.LinePaint.StrokeWidth = 3;
-
-            // Text
-            _valueTextDraw.Paint.TextSize = 25;
-            _valueTextDraw.Margin.Left = 30;
-
-            _titleTextDraw.Paint.TextSize = 35;
-            _titleTextDraw.Margin.Left = 15;
-            _titleTextDraw.Margin.Right = 25;
-            _titleTextDraw.Paint.MeasureText(_textConstants.Title, ref _titleTextDraw.Bounds);
-
-            _iconTextDraw.Paint.TextSize = 35;
-            _iconTextDraw.Paint.MeasureText(_textConstants.Icon, ref _iconTextDraw.Bounds);
-
+            _titleDraw.LinePaint.StrokeWidth = _3px;
+            _maxValueDraw.Radius = _3px;
         }
 
         /// <summary>
@@ -589,17 +766,22 @@ namespace WavesGraphs.Controls
             };
 
             // Max value
-            eventArgs.Surface.Canvas.DrawRect(_maxValueDraw.Bounds, paint);
-
-            paint.Color = SKColors.Yellow;
+            eventArgs.Surface.Canvas.DrawRect(_titleDraw.Bounds, paint);
 
             // Graph
+            paint.Color = SKColors.Yellow;
             eventArgs.Surface.Canvas.DrawRect(_graphDraw.Bounds, paint);
 
+            // Hours
             paint.Color = SKColors.Red;
 
-            // Hours
             eventArgs.Surface.Canvas.DrawRect(_hoursDraw.Bounds, paint);
+
+            // Max value
+            eventArgs.Surface.Canvas.DrawRoundRect(_maxValueDraw.Bounds,
+                _maxValueDraw.Radius,
+                _maxValueDraw.Radius,
+                _maxValueDraw.Paint);
         }
 
         /// <summary>
@@ -722,11 +904,13 @@ namespace WavesGraphs.Controls
     /// <summary>
     /// Max value line draw helper
     /// </summary>
-    public struct MaxValueDraw
+    public struct TitleDraw
     {
         public SKRect Bounds;
 
         public SKPaint LinePaint;
+
+        public float CenterY;
     }
 
     /// <summary>
@@ -739,6 +923,20 @@ namespace WavesGraphs.Controls
         public Margin Margin;
 
         public SKRect Bounds;
+    }
+
+    /// <summary>
+    /// Max value dra helper
+    /// </summary>
+    public struct MaxValueDraw
+    {
+        public float Height;
+
+        public SKRect Bounds;
+
+        public SKPaint Paint;
+
+        public float Radius;
     }
 
     /// <summary>
@@ -765,13 +963,51 @@ namespace WavesGraphs.Controls
     }
 
     /// <summary>
-    /// Graph value used to draw graph line
+    /// Graph value model used to draw graph line
     /// </summary>
     public class GraphValueModel
     {
         public DateTime DateTime;
 
         public int Airflow;
+
+        public int Temperature;
+
+        public int Co2;
+
+        public int Voc;
+    }
+
+    /// <summary>
+    /// Store sensors values
+    /// </summary>
+    public class GraphValues
+    {
+        public List<GraphValueModel> Last24Hours;
+
+        public int MaxAirflow;
+
+        public int MaxTemperature;
+
+        public int MaxCo2;
+
+        public int MaxVoc;
+    }
+
+    /// <summary>
+    /// Sensor label draw helper
+    /// </summary>
+    public struct SensorLabelDraw
+    {
+        public DateTime DateTime;
+
+        public DateTime Value;
+
+        public SKPoint Point;
+
+        public SKPaint LabelPaint;
+
+        public SKPaint LinePaint;
     }
 
     /// <summary>
