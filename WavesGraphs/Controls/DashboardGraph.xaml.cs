@@ -21,8 +21,6 @@ namespace WavesGraphs.Controls
         // Bindable properties
         private GraphValues _graphValues;
 
-        private float _maxValue;
-
         private string[] _timeAsString = {
         "2019-08-15T13:00:00Z",
         "2019-08-15T13:15:00Z",
@@ -128,25 +126,25 @@ namespace WavesGraphs.Controls
                 100,
                 100,
                 100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
                 150,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
+                100,
                 84,
                 84,
                 84,
@@ -222,13 +220,13 @@ namespace WavesGraphs.Controls
                 80
             };
 
-        private int?[] _indoorTemperature =
+        private int?[] _temperature =
             {
                 24,
                 24,
                 24,
                 24,
-                24,
+                15,
                 23,
                 24,
                 23,
@@ -326,6 +324,7 @@ namespace WavesGraphs.Controls
         private CanvasInfo _maxValueCanvasInfo;
         private CanvasInfo _hoursCanvasInfo;
         private CanvasInfo _graphCanvasInfo;
+        private CanvasInfo _sensorLabelsCanvasInfo;
 
         // Draw info
         private TitleDraw _titleDraw;
@@ -377,7 +376,8 @@ namespace WavesGraphs.Controls
                 _graphValues.Last24Hours.Add(new GraphValueModel
                 {
                     DateTime = DateTime.ParseExact(_timeAsString[i], dateFormat, CultureInfo.InvariantCulture),
-                    Airflow = _airflow[i] ?? 0
+                    Airflow = _airflow[i] ?? 0,
+                    Temperature = _temperature[i] ?? 0
                 });
             }
 
@@ -395,6 +395,7 @@ namespace WavesGraphs.Controls
         {
             maxValueCanvas.PaintSurface += MaxValueCanvas_PaintSurface;
             graphCanvas.PaintSurface += GraphCanvas_PaintSurface;
+            sensorLabelsCanvas.PaintSurface += SensorLabelsCanvas_PaintSurface;
 
             maxValueCanvas.InvalidateSurface();
             graphCanvas.InvalidateSurface();
@@ -405,17 +406,6 @@ namespace WavesGraphs.Controls
         /// </summary>
         private void InitPaints()
         {
-            // Sensors
-            _temperatureLabelDraw.LabelPaint = new SKPaint
-            {
-                Color = SKColors.White,
-                IsAntialias = true,
-                Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.IconsFontName)
-            };
-
-            _vocLabelDraw.LabelPaint = _co2LabelDraw.LabelPaint = _temperatureLabelDraw.LabelPaint;
-            _vocLabelDraw.LinePaint = _co2LabelDraw.LinePaint = _temperatureLabelDraw.LinePaint;
-
             // Text
             _maxValueTextDraw.Paint = new SKPaint
             {
@@ -433,14 +423,14 @@ namespace WavesGraphs.Controls
             {
                 IsAntialias = true,
                 Color = SKColors.White,
-                FakeBoldText = true
+                FakeBoldText = true,
             };
 
             _iconTextDraw.Paint = new SKPaint
             {
                 IsAntialias = true,
                 Color = SKColors.White,
-                Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.IconsFontName)
+                Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.Icons)
             };
 
             _titleDraw.LinePaint = new SKPaint
@@ -471,6 +461,30 @@ namespace WavesGraphs.Controls
             {
                 Style = SKPaintStyle.Stroke,
                 Color = SKColors.White,
+            };
+
+            // Sensors
+            _temperatureLabelDraw.ActiveColor = SKColors.White;
+            _temperatureLabelDraw.NormalColor = _graphDraw.FirstGradientColor;
+
+            _temperatureLabelDraw.LinePaint = new SKPaint
+            {
+                Color = _temperatureLabelDraw.ActiveColor,
+                IsAntialias = true,
+                Style = SKPaintStyle.Stroke
+            };
+
+            _temperatureLabelDraw.Icon.Paint = new SKPaint
+            {
+                IsAntialias = true,
+                Color = SKColors.White,
+                Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.Icons)
+            };
+
+            _temperatureLabelDraw.Text.Paint = new SKPaint
+            {
+                Color = SKColors.White,
+                IsAntialias = true
             };
 
             // Hours
@@ -542,16 +556,16 @@ namespace WavesGraphs.Controls
             float percentageFromMaxValue;
             float lastAirflowPercentage = 0;
 
-            // Ordinate
+            // Values
             foreach(var graphValue in _graphValues.Last24Hours)
             {
-                // Value
+                // Airflow
                 point.X += (_graphDraw.Step / _graphDraw.Bounds.Right) * _graphDraw.Bounds.Right;
 
-                percentageFromMaxValue = ((_maxValue - graphValue.Airflow) / _maxValue);
+                percentageFromMaxValue = ((_graphValues.MaxAirflow - graphValue.Airflow) / (float)_graphValues.MaxAirflow);
 
                 if (percentageFromMaxValue < 0.80f)
-                    point.Y = (percentageFromMaxValue * _graphDraw.Bounds.Bottom) +_graphDraw.Bounds.Top;
+                    point.Y = (percentageFromMaxValue * _graphDraw.Bounds.Bottom) + _graphDraw.Bounds.Top;
                 else
                     point.Y = _graphDraw.Bounds.Bottom;
 
@@ -560,7 +574,7 @@ namespace WavesGraphs.Controls
                 lastAirflowPercentage = graphValue.Airflow;
 
                 // Sensors labels
-
+                GetSensorsLabelsPositions(graphValue, point);
             }
 
             // Close graph
@@ -584,6 +598,120 @@ namespace WavesGraphs.Controls
 
             // Draw current value percentage
             DrawCurrentValuePercentage(point, lastAirflowPercentage);
+
+            // Draw sensor lables
+            sensorLabelsCanvas.InvalidateSurface();
+        }
+
+        /// <summary>
+        /// Draw sensors labels 
+        /// </summary>
+        private void DrawSensorsLabels()
+        {
+            // Temperature
+            DrawSensorLabel(_temperatureLabelDraw, IconsHelper.BoostEvent);
+
+            // Co2
+            //DrawSensorLabel(_vocLabelDraw, IconsHelper.VocEvent);
+
+            // Voc
+            //DrawSensorLabel(_co2LabelDraw, IconsHelper.H20Event);
+
+            // Humidity
+        }
+
+        /// <summary>
+        /// Draw sensor label
+        /// </summary>
+        /// <param name="sensorLabelDraw"></param>
+        private void DrawSensorLabel(SensorLabelDraw sensorLabelDraw, string icon)
+        {
+            string time = "";
+
+            // Check if label coords
+            if (sensorLabelDraw.Point.Y == _graphDraw.Bounds.Bottom)
+                return;
+
+            // Measure icon
+            sensorLabelDraw.Icon.Paint.MeasureText(icon, ref sensorLabelDraw.Icon.Bounds);
+
+            float iconMidX = Math.Abs(sensorLabelDraw.Icon.Bounds.MidX);
+            float iconX = sensorLabelDraw.Point.X - iconMidX;
+            float iconY = sensorLabelDraw.Point.Y - (sensorLabelDraw.Icon.Paint.TextSize / 1.75f);
+
+            float lineMarginBottom = 0;
+
+            // Check if label is active
+            if (!sensorLabelDraw.IsActive)
+            {
+                // Measure text
+                time = $"{sensorLabelDraw.DateTime.Hour} : {sensorLabelDraw.DateTime.Minute}";
+
+                sensorLabelDraw.Text.Paint.MeasureText(time, ref sensorLabelDraw.Text.Bounds);
+
+                // Draw active label
+                sensorLabelDraw.Icon.Paint.Color = sensorLabelDraw.LinePaint.Color = sensorLabelDraw.ActiveColor;
+
+                // Draw text
+                float textMidX = Math.Abs(sensorLabelDraw.Text.Bounds.MidX);
+                float textX = sensorLabelDraw.Point.X - textMidX;
+                float textY = _graphDraw.Bounds.Bottom;
+
+                _sensorLabelsCanvasInfo.Canvas.DrawText(time,
+                    new SKPoint(textX, textY),
+                    sensorLabelDraw.Text.Paint);
+
+                lineMarginBottom = sensorLabelDraw.Text.Paint.TextSize + sensorLabelDraw.Text.Margin.Top;
+            }
+            else
+            {
+                // Draw normal label
+                sensorLabelDraw.Icon.Paint.Color = sensorLabelDraw.LinePaint.Color = sensorLabelDraw.NormalColor;
+            }
+
+            // Draw line
+            _sensorLabelsCanvasInfo.Canvas.DrawLine(new SKPoint(sensorLabelDraw.Point.X, iconY),
+                new SKPoint(sensorLabelDraw.Point.X, _graphDraw.Bounds.Bottom - lineMarginBottom),
+                sensorLabelDraw.LinePaint);
+
+            // Draw sensor label icon
+            _sensorLabelsCanvasInfo.Canvas.DrawText(icon,
+                iconX, iconY,
+                sensorLabelDraw.Icon.Paint);
+        }
+
+        /// <summary>
+        /// Get sensors labels positon from current value
+        /// </summary>
+        /// <param name="graphValueModel"></param>
+        /// <param name="point"></param>
+        private void GetSensorsLabelsPositions (GraphValueModel graphValueModel, SKPoint point)
+        {
+            // Temperature
+            if (graphValueModel.Temperature == _graphValues.MaxTemperature)
+            {
+                _temperatureLabelDraw.DateTime = graphValueModel.DateTime;
+                _temperatureLabelDraw.Point = point;
+                _temperatureLabelDraw.Airflow = graphValueModel.Airflow;
+            }
+
+            // Co2
+            if (graphValueModel.Co2 == _graphValues.MaxCo2)
+            {
+                _co2LabelDraw.DateTime = graphValueModel.DateTime;
+                _co2LabelDraw.Point = point;
+                _co2LabelDraw.Airflow = graphValueModel.Airflow;
+            }
+
+            // Voc
+            if (graphValueModel.Voc == _graphValues.MaxVoc)
+            {
+                _vocLabelDraw.DateTime = graphValueModel.DateTime;
+                _vocLabelDraw.Point = point;
+                _vocLabelDraw.Airflow = graphValueModel.Airflow;
+            }
+
+            // Humidity
         }
 
         /// <summary>
@@ -620,6 +748,9 @@ namespace WavesGraphs.Controls
                 new SKPoint(point.X, _hoursDraw.Bounds.Bottom), _hoursDraw.MidnightIndicatorPaint);
         }
 
+        /// <summary>
+        /// Draw graph title
+        /// </summary>
         private void DrawTitle()
         {
             float offsetX = _titleDraw.Bounds.Left;
@@ -646,10 +777,13 @@ namespace WavesGraphs.Controls
                 _titleDraw.LinePaint);
         }
 
+        /// <summary>
+        /// Draw graph max value
+        /// </summary>
         private void DrawMaxValue()
         {
             // Background
-            if (_maxValue > 100)
+            if (_graphValues.MaxAirflow > 100)
             {
                 _maxValueTextDraw.Paint.Color = SKColors.Transparent;
                 _maxValueTextDraw.Paint.BlendMode = SKBlendMode.Clear;
@@ -666,7 +800,7 @@ namespace WavesGraphs.Controls
             point.X = _maxValueDraw.Bounds.MidX - Math.Abs(_maxValueTextDraw.Bounds.MidX);
             point.Y = _maxValueDraw.Bounds.MidY + Math.Abs(_maxValueTextDraw.Bounds.MidY);
 
-            _maxValueCanvasInfo.Canvas.DrawText($"{_maxValue}%", point, _maxValueTextDraw.Paint);
+            _maxValueCanvasInfo.Canvas.DrawText($"{_graphValues.MaxAirflow}%", point, _maxValueTextDraw.Paint);
         }
 
         /// <summary>
@@ -680,6 +814,7 @@ namespace WavesGraphs.Controls
 
             // Iphone 7 original size
             var _3px = screenWidth * 0.004f;
+            var _5px = screenWidth * 0.006666666666667f;
             var _10px = screenWidth * 0.013333333333333f;
             var _15px = screenWidth * 0.02f;
             var _25px = screenWidth * 0.033333333333333f;
@@ -702,7 +837,7 @@ namespace WavesGraphs.Controls
 
             _maxValueTextDraw.Paint.TextSize = _25px;
 
-            _maxValueTextDraw.Paint.MeasureText($"{_maxValue}%", ref _maxValueTextDraw.Bounds);
+            _maxValueTextDraw.Paint.MeasureText($"{_graphValues.MaxAirflow}%", ref _maxValueTextDraw.Bounds);
 
             // Common bounds
             var rightBound = eventArgs.Info.Width * 0.85f;
@@ -751,6 +886,14 @@ namespace WavesGraphs.Controls
             // Max value
             _titleDraw.LinePaint.StrokeWidth = _3px;
             _maxValueDraw.Radius = _3px;
+
+            // Sensors lables
+            _temperatureLabelDraw.LinePaint.StrokeWidth = _3px;
+            _temperatureLabelDraw.Icon.Paint.TextSize = _50px;
+            _temperatureLabelDraw.Text.Paint.TextSize = _25px;
+            _temperatureLabelDraw.Text.Margin.Top = _5px;
+
+            _vocLabelDraw = _co2LabelDraw = _temperatureLabelDraw;
         }
 
         /// <summary>
@@ -797,6 +940,31 @@ namespace WavesGraphs.Controls
 
         #region Canvas
 
+        /// <summary>
+        /// Hours canvas is drawn first, then all remaining canvases are drawn
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void HoursCanvas_PaintSurface
+            (object sender, SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs e)
+        {
+            // Get cavans info
+            _hoursCanvasInfo.Canvas = e.Surface.Canvas;
+            _hoursCanvasInfo.ImageInfo = e.Info;
+            _hoursCanvasInfo.Surface = e.Surface;
+
+            Calculate(e);
+
+            // Draw
+            ClearCanvas(e);
+
+            //DrawBounds(e);
+
+            DrawHoursLine();
+
+            InitCanvases();
+        }
+
         private void MaxValueCanvas_PaintSurface
             (object sender, SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs e)
         {
@@ -827,29 +995,18 @@ namespace WavesGraphs.Controls
             DrawGraph();
         }
 
-        /// <summary>
-        /// Hours canvas is drawn first, then all remaining canvases are drawn
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void HoursCanvas_PaintSurface
+        private void SensorLabelsCanvas_PaintSurface
             (object sender, SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs e)
         {
             // Get cavans info
-            _hoursCanvasInfo.Canvas = e.Surface.Canvas;
-            _hoursCanvasInfo.ImageInfo = e.Info;
-            _hoursCanvasInfo.Surface = e.Surface;
-
-            Calculate(e);
+            _sensorLabelsCanvasInfo.Canvas = e.Surface.Canvas;
+            _sensorLabelsCanvasInfo.ImageInfo = e.Info;
+            _sensorLabelsCanvasInfo.Surface = e.Surface;
 
             // Draw
             ClearCanvas(e);
 
-            //DrawBounds(e);
-
-            DrawHoursLine();
-
-            InitCanvases();
+            DrawSensorsLabels();
         }
 
         #endregion
@@ -945,8 +1102,11 @@ namespace WavesGraphs.Controls
     public struct Margin
     {
         public float Left;
+
         public float Top;
+
         public float Right;
+
         public float Bottom;
     }
 
@@ -999,15 +1159,23 @@ namespace WavesGraphs.Controls
     /// </summary>
     public struct SensorLabelDraw
     {
+        public SKColor ActiveColor;
+
+        public SKColor NormalColor;
+
+        public bool IsActive;
+
         public DateTime DateTime;
 
-        public DateTime Value;
+        public int Airflow;
 
         public SKPoint Point;
 
-        public SKPaint LabelPaint;
-
         public SKPaint LinePaint;
+
+        public TextDraw Icon;
+
+        public TextDraw Text;
     }
 
     /// <summary>

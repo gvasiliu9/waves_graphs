@@ -3,6 +3,6 @@ namespace WavesGraphs.Helpers.Constants
 {
     public static class Fonts
     {
-        public const string IconsFontName = "Icons";
+        public const string Icons = "Icons";
     }
 }
