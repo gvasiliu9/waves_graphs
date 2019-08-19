@@ -25,6 +25,8 @@ namespace WavesGraphs.iOS
             global::Xamarin.Forms.Forms.Init();
             LoadApplication(new App());
 
+            var _ = new TouchTracking.Forms.iOS.TouchEffect();
+
             return base.FinishedLaunching(app, options);
         }
     }

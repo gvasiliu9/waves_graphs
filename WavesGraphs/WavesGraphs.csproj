@@ -15,6 +15,7 @@
     <PackageReference Include="SkiaSharp.Views.Forms" Version="1.68.0" />
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
     <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
+    <PackageReference Include="TouchTracking.Forms" Version="1.1.0" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="livesharp.rules" />

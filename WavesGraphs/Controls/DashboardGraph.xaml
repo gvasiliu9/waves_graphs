@@ -4,12 +4,20 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:helpers="clr-namespace:WavesGraphs.Helpers"
     xmlns:skia="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms"
+    xmlns:tt="clr-namespace:TouchTracking.Forms;assembly=TouchTracking.Forms"
     x:Class="WavesGraphs.Controls.DashboardGraph">
 
     <ContentView.Content>
 
             <!--Graph canvas view-->
             <AbsoluteLayout>
+
+                <!--Touch tracking-->
+                <AbsoluteLayout.Effects>
+
+                    <tt:TouchEffect Capture="True" TouchAction="OnTouch" />
+
+                </AbsoluteLayout.Effects>
 
                 <!--Max value line-->
                 <skia:SKCanvasView
