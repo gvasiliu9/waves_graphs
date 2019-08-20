@@ -22,7 +22,16 @@
         <controls:DashboardGraph
             x:Name="dashboardGraph"
             Opacity="0"
-            Grid.Row="1"/>
+            Grid.Row="1">
+
+            <!--Gestures-->
+            <controls:DashboardGraph.GestureRecognizers>
+
+                <TapGestureRecognizer Tapped="OnGraphTapped"/>
+
+            </controls:DashboardGraph.GestureRecognizers>
+
+        </controls:DashboardGraph>
 
         <BoxView
             Grid.Row="2"

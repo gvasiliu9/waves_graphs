@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using SkiaSharp;
 using TouchTracking;
 using WavesGraphs.Helpers;
 using WavesGraphs.Helpers.Constants;
+using WavesGraphs.Models;
 using Xamarin.Forms;
 
 namespace WavesGraphs.Controls
@@ -14,155 +16,9 @@ namespace WavesGraphs.Controls
     {
         #region Fields
 
-        // Bindable properties
-        private GraphValues _graphValues;
-
-        private string[] _timeAsString = {
-            "2019-08-18T23:59:59Z",
-            "2019-08-19T00:00:00Z",
-            "2019-08-19T00:15:00Z",
-            "2019-08-19T00:30:00Z",
-            "2019-08-19T00:45:00Z",
-            "2019-08-19T01:00:00Z",
-            "2019-08-19T01:15:00Z",
-            "2019-08-19T01:30:00Z",
-            "2019-08-19T01:45:00Z",
-            "2019-08-19T02:00:00Z",
-            "2019-08-19T02:15:00Z",
-            "2019-08-19T02:30:00Z",
-            "2019-08-19T02:45:00Z",
-            "2019-08-19T03:00:00Z",
-            "2019-08-19T03:15:00Z",
-            "2019-08-19T03:30:00Z",
-            "2019-08-19T03:45:00Z",
-            "2019-08-19T04:00:00Z",
-            "2019-08-19T04:15:00Z",
-            "2019-08-19T04:30:00Z",
-            "2019-08-19T04:45:00Z",
-            "2019-08-19T05:00:00Z",
-            "2019-08-19T05:15:00Z",
-            "2019-08-19T05:30:00Z",
-            "2019-08-19T05:45:00Z",
-            "2019-08-19T06:00:00Z",
-            "2019-08-19T06:15:00Z",
-            "2019-08-19T06:30:00Z",
-            "2019-08-19T06:45:00Z",
-            "2019-08-19T07:00:00Z",
-            "2019-08-19T07:15:00Z",
-            "2019-08-19T07:30:00Z",
-            "2019-08-19T07:45:00Z",
-            "2019-08-19T08:00:00Z",
-            "2019-08-19T08:15:00Z",
-            "2019-08-19T08:30:00Z",
-            "2019-08-19T08:45:00Z",
-            "2019-08-19T09:00:00Z",
-            "2019-08-19T09:15:00Z",
-            "2019-08-19T09:30:00Z",
-            "2019-08-19T09:45:00Z",
-            "2019-08-19T10:00:00Z"
-        };
-
-        private int?[] _airflow =
-            {
-                100,
-                100,
-                100,
-                100,
-                150,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80
-            };
-
         // Canvas info
+        private Size _size;
+
         private CanvasInfo _maxValueCanvasInfo;
         private CanvasInfo _hoursCanvasInfo;
         private CanvasInfo _graphCanvasInfo;
@@ -175,12 +31,10 @@ namespace WavesGraphs.Controls
         private HoursDraw _hoursDraw;
         private CurrentValueIndicatorDraw _currentValueIndicatorDraw;
 
+        private DateTime _previousEventDateTime;
+
         // Sensors
         private List<SensorLabelDraw> _sensorLabelDraws;
-
-        //private SensorLabelDraw _temperatureLabelDraw;
-        //private SensorLabelDraw _vocLabelDraw;
-        //private SensorLabelDraw _co2LabelDraw;
 
         // Text
         private TextConstants _textConstants;
@@ -195,6 +49,20 @@ namespace WavesGraphs.Controls
 
         #endregion
 
+        #region BindableProperties
+
+        public static readonly BindableProperty ValuesProperty = BindableProperty
+            .Create(nameof(Values), typeof(GraphValues), typeof(DashboardGraph), default(GraphValues));
+
+        public GraphValues Values
+        {
+            get => (GraphValues)GetValue(ValuesProperty);
+
+            set => SetValue(ValuesProperty, value);
+        }
+
+        #endregion
+
         public DashboardGraph()
         {
             InitializeComponent();
@@ -202,8 +70,6 @@ namespace WavesGraphs.Controls
             hoursCanvas.PaintSurface += HoursCanvas_PaintSurface;
 
             InitPaints();
-
-            InitGraphValues();
 
             _textConstants.Hours = "24H";
             _textConstants.Title = "Ventilation";
@@ -213,42 +79,6 @@ namespace WavesGraphs.Controls
         }
 
         #region Methods
-
-        private void InitGraphValues()
-        {
-            string dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-            _graphValues = new GraphValues();
-            _graphValues.Airflow = new List<GraphAirflowModel>();
-
-            for (int i = 0; i < _timeAsString.Length; i++)
-            {
-                _graphValues.Airflow.Add(new GraphAirflowModel
-                {
-                    DateTime = DateTime.ParseExact(_timeAsString[i], dateFormat, CultureInfo.InvariantCulture),
-                    Airflow = _airflow[i] ?? 0,
-                });
-            }
-
-            // Check max airflow value, to determine graph scale
-            int maxAirflow = _graphValues.Airflow.Select(v => v.Airflow).Max();
-
-            if (maxAirflow <= 100)
-                _graphValues.Scale = 100;
-            else if (maxAirflow > 100 && maxAirflow <= 150)
-                _graphValues.Scale = 150;
-            else
-                _graphValues.Scale = 200;
-
-            // Events
-            _graphValues.Events = new List<GraphEventModel>();
-
-            _graphValues.Events.Add(new GraphEventModel
-            {
-                 Icon = "CO2",
-                 Time = _graphValues.Airflow[5].DateTime,
-            });
-        }
 
         /// <summary>
         /// Init all canvases
@@ -325,30 +155,6 @@ namespace WavesGraphs.Controls
                 Color = SKColors.White,
             };
 
-            // Sensors
-            //_temperatureLabelDraw.ActiveColor = SKColors.White;
-            //_temperatureLabelDraw.NormalColor = _graphDraw.FirstGradientColor;
-
-            //_temperatureLabelDraw.LinePaint = new SKPaint
-            //{
-            //    Color = _temperatureLabelDraw.NormalColor,
-            //    IsAntialias = true,
-            //    Style = SKPaintStyle.Stroke
-            //};
-
-            //_temperatureLabelDraw.IconTextDraw.Paint = new SKPaint
-            //{
-            //    IsAntialias = true,
-            //    Color = SKColors.White,
-            //    Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.Icons)
-            //};
-
-            //_temperatureLabelDraw.HourTextDraw.Paint = new SKPaint
-            //{
-            //    Color = SKColors.White,
-            //    IsAntialias = true
-            //};
-
             // Hours
             _hoursDraw.Paint = new SKPaint
             {
@@ -375,21 +181,21 @@ namespace WavesGraphs.Controls
             point.Y = _hoursDraw.Bounds.MidY;
 
             // Draw hours circles
-            foreach(var datetime in _graphValues.Airflow.Select(v => v.DateTime))
+            foreach(var datetime in Values.Airflow.Select(v => v.DateTime))
             {
                 if (datetime.Minute != 0)
                     continue;
                     
                 if (datetime.TimeOfDay.Ticks == 0)
                     DrawMidnightIndicator(point);
-                else
+                else if(point.X <= _hoursDraw.Bounds.Right)
                     DrawHourCircle(point);
 
                 point.X += _hoursDraw.Step;
             }
 
             // Draw text
-            _hoursCanvasInfo.Canvas.DrawText(_textConstants.Hours,
+            _hoursCanvasInfo.Canvas.DrawText($"{_hoursDraw.TotalHours}H",
                 new SKPoint(_hoursDraw.Bounds.Right + _valueTextDraw.Margin.Left,
                     _hoursDraw.Bounds.MidY + ((_valueTextDraw.Paint.TextSize / 2f) - _hoursDraw.CircleRadius)),
                 _valueTextDraw.Paint);
@@ -402,8 +208,13 @@ namespace WavesGraphs.Controls
         private void DrawHourCircle(SKPoint center)
             => _hoursCanvasInfo.Canvas.DrawCircle(center, _hoursDraw.CircleRadius, _hoursDraw.Paint);
 
+        /// <summary>
+        /// Convert airflow value to percentage, in order to find Y cordinate on graph
+        /// </summary>
+        /// <param name="airflow"></param>
+        /// <returns></returns>
         private float AirflowToPercentage(int airflow)
-            => ((_graphValues.Scale - airflow) / (float)_graphValues.Scale);
+            => ((Values.Scale - airflow) / (float)Values.Scale);
 
         /// <summary>
         /// Draw graph line
@@ -422,7 +233,7 @@ namespace WavesGraphs.Controls
             float lastAirflowPercentage = 0;
 
             // Values
-            foreach(var graphValue in _graphValues.Airflow)
+            foreach(var graphValue in Values.Airflow)
             {
                 // Airflow
                 point.X += (_graphDraw.Step / _graphDraw.Bounds.Right) * _graphDraw.Bounds.Right;
@@ -462,6 +273,8 @@ namespace WavesGraphs.Controls
             DrawCurrentValuePercentage(point, lastAirflowPercentage);
 
             // Draw sensor lables
+            GetSensorLabels();
+
             sensorLabelsCanvas.InvalidateSurface();
         }
 
@@ -470,30 +283,82 @@ namespace WavesGraphs.Controls
         /// </summary>
         private void DrawSensorsLabels()
         {
-            DateTime lastMeasurement = _graphValues.Airflow.Last().DateTime;
-            DateTime firstMeasurement = _graphValues.Airflow.First().DateTime;
+            foreach(var sensorLabelDraw in _sensorLabelDraws)
+                DrawSensorLabel(sensorLabelDraw);
+        }
+
+        /// <summary>
+        /// Get sensor labels position to display on graph
+        /// </summary>
+        private void GetSensorLabels()
+        {
+            _sensorLabelDraws.Clear();
+            _previousEventDateTime = default(DateTime);
+
+            DateTime lastMeasurement = Values.Airflow.Last().DateTime;
+            DateTime firstMeasurement = Values.Airflow.First().DateTime;
 
             double totalElapsedSeconds = ((lastMeasurement - firstMeasurement).TotalSeconds);
 
-            float x;
+            float x, y;
 
             SensorLabelDraw sensorLabelDraw;
 
-            foreach (var graphEvent in _graphValues.Events)
+            foreach (var graphEvent in Values.Events)
             {
-                x = (float)(totalElapsedSeconds - ((lastMeasurement - graphEvent.Time).TotalSeconds)) / (float)totalElapsedSeconds;
+                // Check previous drawn sensor label
+                if ((graphEvent.Time - _previousEventDateTime).TotalMinutes < 60)
+                    continue;
 
+                // Calculate x coordinate
+                x = ((float)(totalElapsedSeconds - ((lastMeasurement - graphEvent.Time).TotalSeconds)) /
+                    (float)totalElapsedSeconds) * _graphDraw.Bounds.Right;
+
+                y = (AirflowToPercentage(Values.Airflow.First(a => a.DateTime == graphEvent.Time).Airflow)
+                        * _graphDraw.Bounds.Bottom) + _graphDraw.Bounds.Top;
+
+                // Create new sensor label
                 sensorLabelDraw = new SensorLabelDraw
                 {
-                    Point = new SKPoint(x * _graphDraw.Bounds.Right,
-                        _graphValues.Airflow.First(a => a.DateTime == graphEvent.Time).Airflow),
+                    Point = new SKPoint(x, y),
                     DateTime = graphEvent.Time,
-                    Icon = graphEvent.Icon
+                    Icon = IconsHelper.GetIconForDashboardGraph(graphEvent.Icon),
                 };
 
+                // Init sensor label paints
+                sensorLabelDraw.ActiveColor = SKColors.White;
+                sensorLabelDraw.NormalColor = _graphDraw.FirstGradientColor;
+
+                sensorLabelDraw.LinePaint = new SKPaint
+                {
+                    Color = sensorLabelDraw.NormalColor,
+                    IsAntialias = true,
+                    Style = SKPaintStyle.Stroke
+                };
+
+                sensorLabelDraw.IconTextDraw.Paint = new SKPaint
+                {
+                    IsAntialias = true,
+                    Color = SKColors.White,
+                    Typeface = SkiaSharpHelper.LoadTtfFont(Fonts.Icons)
+                };
+
+                sensorLabelDraw.HourTextDraw.Paint = new SKPaint
+                {
+                    Color = SKColors.White,
+                    IsAntialias = true
+                };
+
+                // Text size
+                sensorLabelDraw.LinePaint.StrokeWidth = _size._3px;
+                sensorLabelDraw.IconTextDraw.Paint.TextSize = _size._50px;
+                sensorLabelDraw.HourTextDraw.Paint.TextSize = _size._25px;
+                sensorLabelDraw.HourTextDraw.Margin.Top = _size._5px;
+
+                // Add to sensors list
                 _sensorLabelDraws.Add(sensorLabelDraw);
 
-                DrawSensorLabel(ref sensorLabelDraw);
+                _previousEventDateTime = graphEvent.Time;
             }
         }
 
@@ -501,7 +366,7 @@ namespace WavesGraphs.Controls
         /// Draw sensor label
         /// </summary>
         /// <param name="sensorLabelDraw"></param>
-        private void DrawSensorLabel(ref SensorLabelDraw sensorLabelDraw)
+        private void DrawSensorLabel(SensorLabelDraw sensorLabelDraw)
         {
             string time = "";
 
@@ -647,7 +512,7 @@ namespace WavesGraphs.Controls
         private void DrawMaxValue()
         {
             // Background
-            if (_graphValues.Scale > 100)
+            if (Values.Scale > 100)
             {
                 _maxValueTextDraw.Paint.Color = SKColors.Transparent;
                 _maxValueTextDraw.Paint.BlendMode = SKBlendMode.Clear;
@@ -664,7 +529,7 @@ namespace WavesGraphs.Controls
             point.X = _maxValueDraw.Bounds.MidX - Math.Abs(_maxValueTextDraw.Bounds.MidX);
             point.Y = _maxValueDraw.Bounds.MidY + Math.Abs(_maxValueTextDraw.Bounds.MidY);
 
-            _maxValueCanvasInfo.Canvas.DrawText($"{_graphValues.Scale}%", point, _maxValueTextDraw.Paint);
+            _maxValueCanvasInfo.Canvas.DrawText($"{Values.Scale}%", point, _maxValueTextDraw.Paint);
         }
 
         /// <summary>
@@ -677,31 +542,31 @@ namespace WavesGraphs.Controls
             float screenWidth = eventArgs.Info.Width;
 
             // Iphone 7 original size
-            var _3px = screenWidth * 0.004f;
-            var _5px = screenWidth * 0.006666666666667f;
-            var _10px = screenWidth * 0.013333333333333f;
-            var _15px = screenWidth * 0.02f;
-            var _25px = screenWidth * 0.033333333333333f;
-            var _30px = screenWidth * 0.04f;
-            var _35px = screenWidth * 0.046666666666667f;
-            var _40px = screenWidth * 0.053333333333333f;
-            var _50px = screenWidth * 0.066666666666667f;
+            _size._3px = screenWidth * 0.004f;
+            _size._5px = screenWidth * 0.006666666666667f;
+            _size._10px = screenWidth * 0.013333333333333f;
+            _size._15px = screenWidth * 0.02f;
+            _size._25px = screenWidth * 0.033333333333333f;
+            _size._30px = screenWidth * 0.04f;
+            _size._35px = screenWidth * 0.046666666666667f;
+            _size._40px = screenWidth * 0.053333333333333f;
+            _size._50px = screenWidth * 0.066666666666667f;
 
             // Text
-            _valueTextDraw.Paint.TextSize = _25px;
-            _valueTextDraw.Margin.Left = _30px;
+            _valueTextDraw.Paint.TextSize = _size._25px;
+            _valueTextDraw.Margin.Left = _size._30px;
 
-            _titleTextDraw.Paint.TextSize = _35px;
-            _titleTextDraw.Margin.Left = _15px;
-            _titleTextDraw.Margin.Right = _25px;
+            _titleTextDraw.Paint.TextSize = _size._35px;
+            _titleTextDraw.Margin.Left = _size._15px;
+            _titleTextDraw.Margin.Right = _size._25px;
             _titleTextDraw.Paint.MeasureText(_textConstants.Title, ref _titleTextDraw.Bounds);
 
-            _iconTextDraw.Paint.TextSize = _35px;
+            _iconTextDraw.Paint.TextSize = _size._35px;
             _iconTextDraw.Paint.MeasureText(_textConstants.Icon, ref _iconTextDraw.Bounds);
 
-            _maxValueTextDraw.Paint.TextSize = _25px;
+            _maxValueTextDraw.Paint.TextSize = _size._25px;
 
-            _maxValueTextDraw.Paint.MeasureText($"{_graphValues.Scale}%", ref _maxValueTextDraw.Bounds);
+            _maxValueTextDraw.Paint.MeasureText($"{Values.Scale}%", ref _maxValueTextDraw.Bounds);
 
             // Common bounds
             var rightBound = eventArgs.Info.Width * 0.85f;
@@ -710,31 +575,31 @@ namespace WavesGraphs.Controls
 
             // Max value
             _titleDraw.Bounds.Top = 0;
-            _titleDraw.Bounds.Left = _15px;
+            _titleDraw.Bounds.Left = _size._15px;
             _titleDraw.Bounds.Bottom = maxValueLinAndGraphLineIntersectionBound;
             _titleDraw.Bounds.Right = rightBound;
 
             _titleDraw.CenterY = _titleDraw.Bounds.MidY - Math.Abs(_titleTextDraw.Bounds.MidY);
 
-            _maxValueDraw.Height = _40px;
+            _maxValueDraw.Height = _size._40px;
 
             _maxValueDraw.Bounds.Top = _titleDraw.CenterY - (_maxValueDraw.Height / 2);
-            _maxValueDraw.Bounds.Left = rightBound + _15px;
+            _maxValueDraw.Bounds.Left = rightBound + _size._15px;
             _maxValueDraw.Bounds.Bottom = _maxValueDraw.Bounds.Top + _maxValueDraw.Height;
-            _maxValueDraw.Bounds.Right = eventArgs.Info.Width - _10px;
+            _maxValueDraw.Bounds.Right = eventArgs.Info.Width - _size._10px;
 
             // Graph
-            _graphDraw.Step = rightBound / _graphValues.Airflow.Count();
+            _graphDraw.Step = rightBound / Values.Airflow.Count();
 
             _graphDraw.Bounds.Top = maxValueLinAndGraphLineIntersectionBound;
             _graphDraw.Bounds.Left = 0;
-            _graphDraw.Bounds.Bottom = graphLineAndHoursLineIntersectionBound - _15px;
+            _graphDraw.Bounds.Bottom = graphLineAndHoursLineIntersectionBound - _size._15px;
             _graphDraw.Bounds.Right = rightBound;
 
-            _graphDraw.Paint.PathEffect = SKPathEffect.CreateCorner(_50px);
+            _graphDraw.Paint.PathEffect = SKPathEffect.CreateCorner(_size._50px);
 
-            _currentValueIndicatorDraw.Paint.StrokeWidth = _3px;
-            _currentValueIndicatorDraw.Radius = _10px;
+            _currentValueIndicatorDraw.Paint.StrokeWidth = _size._3px;
+            _currentValueIndicatorDraw.Radius = _size._10px;
 
             // Hours
             _hoursDraw.Bounds.Top = graphLineAndHoursLineIntersectionBound;
@@ -742,25 +607,21 @@ namespace WavesGraphs.Controls
             _hoursDraw.Bounds.Bottom = eventArgs.Info.Height;
             _hoursDraw.Bounds.Right = rightBound;
 
-            _hoursDraw.Step = _hoursDraw.Bounds.Width /
-                (float)(_graphValues.Airflow.Last().DateTime -
-                 _graphValues.Airflow.First().DateTime).TotalHours;
+            _hoursDraw.TotalHours = (int)(Values.Airflow.Last().DateTime -
+                 Values.Airflow.First().DateTime).TotalHours;
 
-            _hoursDraw.CircleRadius = _3px;
+            if (_hoursDraw.TotalHours < 1)
+                _hoursDraw.TotalHours = 1;
 
-            _hoursDraw.MidnightIndicatorPaint.StrokeWidth = _3px;
+            _hoursDraw.Step = _hoursDraw.Bounds.Width / _hoursDraw.TotalHours;
+
+            _hoursDraw.CircleRadius = _size._3px;
+
+            _hoursDraw.MidnightIndicatorPaint.StrokeWidth = _size._3px;
 
             // Max value
-            _titleDraw.LinePaint.StrokeWidth = _3px;
-            _maxValueDraw.Radius = _3px;
-
-            // Sensors lables
-            //_temperatureLabelDraw.LinePaint.StrokeWidth = _3px;
-            //_temperatureLabelDraw.IconTextDraw.Paint.TextSize = _50px;
-            //_temperatureLabelDraw.HourTextDraw.Paint.TextSize = _25px;
-            //_temperatureLabelDraw.HourTextDraw.Margin.Top = _5px;
-
-            //_vocLabelDraw = _co2LabelDraw = _temperatureLabelDraw;
+            _titleDraw.LinePaint.StrokeWidth = _size._3px;
+            _maxValueDraw.Radius = _size._3px;
         }
 
         /// <summary>
@@ -817,24 +678,11 @@ namespace WavesGraphs.Controls
         /// Activate sensor label and show time
         /// </summary>
         /// <returns></returns>
-        private bool ActivateSensorLabel()
+        private void ActivateSensorLabel()
         {
-            bool result;
-
-            //result = _temperatureLabelDraw.IsActive = IsSensorLabelActivated(_temperatureLabelDraw);
-            //result = _co2LabelDraw.IsActive = IsSensorLabelActivated(_co2LabelDraw);
-            //result = _vocLabelDraw.IsActive = IsSensorLabelActivated(_vocLabelDraw);
-
-            return false;
+            foreach (var sensorLabelDraw in _sensorLabelDraws)
+                sensorLabelDraw.IsActive = sensorLabelDraw.Bounds.Contains(_touchPoint);
         }
-
-        /// <summary>
-        /// Check if sensor label was touched
-        /// </summary>
-        /// <param name="sensorLabelDraw"></param>
-        /// <returns></returns>
-        private bool IsSensorLabelActivated(SensorLabelDraw sensorLabelDraw)
-            => sensorLabelDraw.Bounds.Contains(_touchPoint);
 
         #endregion
 
@@ -849,36 +697,27 @@ namespace WavesGraphs.Controls
             switch (args.Type)
             {
                 case TouchActionType.Pressed:
-                    // Check if the inner circle was touched
-                    if (ActivateSensorLabel())
-                    {
-                        _touchId = args.Id;
 
-                        sensorLabelsCanvas.InvalidateSurface();
-                    }
-                    else
-                    {
-                        sensorLabelsCanvas.InvalidateSurface();
-                    }
+                    ActivateSensorLabel();
 
-                    break;
+                    sensorLabelsCanvas.InvalidateSurface();
 
-                case TouchActionType.Moved:
-                    if (_touchId == args.Id)
-                    {
-                        // No action
-                    }
+                break;
+            }
+        }
 
-                    break;
+        protected override async void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        { 
+            base.OnPropertyChanged(propertyName);
 
-                case TouchActionType.Released:
-                case TouchActionType.Cancelled:
-                    {
-                        _touchId = -1;
+            // Values
+            if (propertyName == ValuesProperty.PropertyName)
+            {
+                await this.FadeTo(0.25);
 
-                        // No action
-                    }
-                    break;
+                hoursCanvas.InvalidateSurface();
+
+                await this.FadeTo(1, 750);
             }
         }
 
@@ -951,7 +790,6 @@ namespace WavesGraphs.Controls
             ClearCanvas(e);
 
             DrawSensorsLabels();
-
         }
 
         #endregion
@@ -973,6 +811,8 @@ namespace WavesGraphs.Controls
         public SKPaint Paint;
 
         public SKPaint MidnightIndicatorPaint;
+
+        public int TotalHours;
     }
 
     /// <summary>
@@ -1068,38 +908,9 @@ namespace WavesGraphs.Controls
     }
 
     /// <summary>
-    /// Graph value model used to draw graph line
-    /// </summary>
-    public class GraphAirflowModel
-    {
-        public DateTime DateTime;
-
-        public int Airflow;
-    }
-
-    public class GraphEventModel
-    {
-        public DateTime Time { get; set; }
-
-        public string Icon { get; set; }
-    }
-
-    /// <summary>
-    /// Store sensors values
-    /// </summary>
-    public class GraphValues
-    {
-        public int Scale;
-
-        public List<GraphAirflowModel> Airflow;
-
-        public List<GraphEventModel> Events;
-    }
-
-    /// <summary>
     /// Sensor label draw helper
     /// </summary>
-    public struct SensorLabelDraw
+    public class SensorLabelDraw
     {
         public SKRect Bounds;
 
@@ -1107,21 +918,21 @@ namespace WavesGraphs.Controls
 
         public SKColor NormalColor;
 
-        public bool IsActive;
+        public bool IsActive { get; set; }
 
-        public DateTime DateTime;
+        public DateTime DateTime { get; set; }
 
-        public int Airflow;
+        public int Airflow { get; set; }
 
         public SKPoint Point;
 
-        public SKPaint LinePaint;
+        public SKPaint LinePaint { get; set; }
 
         public TextDraw IconTextDraw;
 
         public TextDraw HourTextDraw;
 
-        public string Icon;
+        public string Icon { get; set; }
     }
 
     /// <summary>
@@ -1134,5 +945,21 @@ namespace WavesGraphs.Controls
         public string Title;
 
         public string Icon;
+    }
+
+    /// <summary>
+    /// Store size calculations, for responsive design
+    /// </summary>
+    public struct Size
+    {
+        public float _3px;
+        public float _5px;
+        public float _10px;
+        public float _15px;
+        public float _25px;
+        public float _30px;
+        public float _35px;
+        public float _40px;
+        public float _50px;
     }
 }
