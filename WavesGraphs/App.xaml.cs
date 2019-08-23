@@ -1,4 +1,5 @@
 ﻿using System;
+using WavesGraphs.Pages;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -10,7 +11,7 @@ namespace WavesGraphs
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            MainPage = new HistoryPage();
         }
 
         protected override void OnStart()

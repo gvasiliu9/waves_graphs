@@ -25,6 +25,7 @@
   <ItemGroup>
     <Compile Remove="Extensions\XamarinFormsMarkupExtensions.cs" />
     <Compile Remove="Controls\_4hGraph.cs" />
+    <Compile Remove="Controls\Models\CanvasInfoModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -35,11 +36,20 @@
     <Folder Include="Models\" />
     <Folder Include="Models\DashboardGraph\" />
     <Folder Include="Models\ZoneGraph\" />
+    <Folder Include="Pages\" />
+    <Folder Include="Controls\History\" />
+    <Folder Include="Controls\Dashboard\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Controls\_4hGraph.xaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Fonts\Icons.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Controls\Dashboard\DashboardGraph.xaml.cs">
+      <DependentUpon>DashboardGraph.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
 </Project>

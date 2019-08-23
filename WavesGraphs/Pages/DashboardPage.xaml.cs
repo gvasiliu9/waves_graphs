@@ -11,10 +11,10 @@ using SkiaSharp;
 using WavesGraphs.Models;
 using Xamarin.Forms;
 
-namespace WavesGraphs
+namespace WavesGraphs.Pages
 {
     [DesignTimeVisible(false)]
-    public partial class MainPage : ContentPage
+    public partial class DashboardPage : ContentPage
     {
         #region Fields
 
@@ -167,7 +167,7 @@ namespace WavesGraphs
 
         #endregion
 
-        public MainPage()
+        public DashboardPage()
         {
             InitializeComponent();
 
