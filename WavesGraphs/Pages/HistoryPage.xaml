@@ -27,19 +27,21 @@
             </StackLayout>
 
             <!--Graphs-->
-            <StackLayout
+            <ScrollView
                 Grid.Row="1"
-                Margin="5,0"
-                BackgroundColor="White">
+                Margin="5,0">
 
-                <!--Graph component-->
-                <Label
-                    x:Name="percentage" />
+                <StackLayout>
 
-                <Label
-                    x:Name="time" />
+                    <!--Temperature-->
+                    <controls:HistoryGraph
+                        x:Name="temperatureGraph"
+                        Title="Temperature"
+                        Description="Indoor" />
 
-            </StackLayout>
+                </StackLayout>
+
+            </ScrollView>
 
             <!--Timeline-->
             <controls:TimelineSlider

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using WavesGraphs.Models.History;
 using Xamarin.Forms;
 
 namespace WavesGraphs.Pages
@@ -87,6 +88,46 @@ namespace WavesGraphs.Pages
             InitializeComponent();
 
             InitTimelineSlider();
+
+            // Scale
+            temperatureGraph.ScaleIntervals = new List<ScaleIntervalModel>
+            {
+                new ScaleIntervalModel
+                {
+                    From = 0,
+                    To = 15,
+                    Name = "Low",
+                    Color = "#D7304B"
+                },
+                new ScaleIntervalModel
+                {
+                    From = 15,
+                    To = 20,
+                    Name = "Medium",
+                    Color = "#FAB269"
+                },
+                new ScaleIntervalModel
+                {
+                    From = 20,
+                    To = 25,
+                    Name = "Good",
+                    Color = "#3295C7"
+                },
+                new ScaleIntervalModel
+                {
+                    From = 25,
+                    To = 30,
+                    Name = "Medium",
+                    Color = "#FAB269"
+                },
+                new ScaleIntervalModel
+                {
+                    From = 30,
+                    To = 35,
+                    Name = "High",
+                    Color = "#D7304B"
+                }
+            };
         }
 
         void InitTimelineSlider()
@@ -109,13 +150,13 @@ namespace WavesGraphs.Pages
             // Percentage
             if (e.PropertyName == nameof(timelineSlider.Value))
             {
-                percentage.Text = $"Precentage = {timelineSlider.Value}";
+                //percentage.Text = $"Precentage = {timelineSlider.Value}";
             }
 
             // Time
             if (e.PropertyName == nameof(timelineSlider.Time))
             {
-                time.Text = $"Time = {timelineSlider.Time.ToString()}";
+                //time.Text = $"Time = {timelineSlider.Time.ToString()}";
             }
         }
     }

@@ -5,7 +5,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using SkiaSharp;
 using TouchTracking;
+using WavesGraphs.Controls.Models.Shared;
 using Xamarin.Forms;
+using WavesGraphs.Controls.Models.History.TimelineSlider;
 
 namespace WavesGraphs.Controls
 {
@@ -508,59 +510,5 @@ namespace WavesGraphs.Controls
         }
 
         #endregion
-    }
-
-    enum TimelineType
-    {
-        Day,
-        Week
-    }
-
-    class TimelineSegment
-    {
-        public int Intervals;
-
-        public List<DateTime> Hours;
-
-        public SKRect Bounds;
-    }
-
-    struct TimeLineDraw
-    {
-        public float Step;
-
-        public SKRect Bounds;
-
-        public SKPaint HourCirclePaint;
-
-        public SKPaint DayLinePaint;
-
-        public float DayLineHeight;
-
-        public float HourCircleRadius;
-    }
-
-    struct ThumbDraw
-    {
-        public SKRect Bounds;
-
-        public SKPoint Point;
-
-        public SKPaint Paint;
-
-        public float Radius;
-
-        public TextDraw TextDraw;
-    }
-
-    struct Touch
-    {
-        public long Id;
-
-        public SKPoint Current;
-
-        public SKPoint Previous;
-
-        public SKMatrix Matrix;
     }
 }

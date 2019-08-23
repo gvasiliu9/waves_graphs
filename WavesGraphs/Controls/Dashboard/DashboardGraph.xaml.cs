@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using SkiaSharp;
 using TouchTracking;
+using WavesGraphs.Controls.Models.DashboardGraph;
+using WavesGraphs.Controls.Models.Shared;
 using WavesGraphs.Helpers;
 using WavesGraphs.Helpers.Constants;
 using WavesGraphs.Models;
@@ -17,7 +19,7 @@ namespace WavesGraphs.Controls
         #region Fields
 
         // Canvas info
-        private Size _size;
+        private Models.DashboardGraph.Size _size;
 
         private CanvasInfo _maxValueCanvasInfo;
         private CanvasInfo _hoursCanvasInfo;
@@ -181,14 +183,14 @@ namespace WavesGraphs.Controls
             point.Y = _hoursDraw.Bounds.MidY;
 
             // Draw hours circles
-            foreach(var datetime in Values.Airflow.Select(v => v.DateTime))
+            foreach (var datetime in Values.Airflow.Select(v => v.DateTime))
             {
                 if (datetime.Minute != 0)
                     continue;
-                    
+
                 if (datetime.TimeOfDay.Ticks == 0)
                     DrawMidnightIndicator(point);
-                else if(point.X <= _hoursDraw.Bounds.Right)
+                else if (point.X <= _hoursDraw.Bounds.Right)
                     DrawHourCircle(point);
 
                 point.X += _hoursDraw.Step;
@@ -233,7 +235,7 @@ namespace WavesGraphs.Controls
             float lastAirflowPercentage = 0;
 
             // Values
-            foreach(var graphValue in Values.Airflow)
+            foreach (var graphValue in Values.Airflow)
             {
                 // Airflow
                 point.X += (_graphDraw.Step / _graphDraw.Bounds.Right) * _graphDraw.Bounds.Right;
@@ -283,7 +285,7 @@ namespace WavesGraphs.Controls
         /// </summary>
         private void DrawSensorsLabels()
         {
-            foreach(var sensorLabelDraw in _sensorLabelDraws)
+            foreach (var sensorLabelDraw in _sensorLabelDraws)
                 DrawSensorLabel(sensorLabelDraw);
         }
 
@@ -450,7 +452,7 @@ namespace WavesGraphs.Controls
                 _currentValueIndicatorDraw.Paint);
 
             // Down line
-            if(_graphDraw.Bounds.Bottom - point.Y > _currentValueIndicatorDraw.Radius)
+            if (_graphDraw.Bounds.Bottom - point.Y > _currentValueIndicatorDraw.Radius)
                 _graphCanvasInfo.Canvas.DrawLine(new SKPoint(point.X, point.Y + _currentValueIndicatorDraw.Radius),
                     new SKPoint(point.X, _graphDraw.Bounds.Bottom), _currentValueIndicatorDraw.Paint);
         }
@@ -702,12 +704,12 @@ namespace WavesGraphs.Controls
 
                     sensorLabelsCanvas.InvalidateSurface();
 
-                break;
+                    break;
             }
         }
 
         protected override async void OnPropertyChanged([CallerMemberName] string propertyName = null)
-        { 
+        {
             base.OnPropertyChanged(propertyName);
 
             // Values
@@ -795,171 +797,5 @@ namespace WavesGraphs.Controls
         #endregion
 
         #endregion
-    }
-
-    /// <summary>
-    /// Hours line draw helper
-    /// </summary>
-    public struct HoursDraw
-    {
-        public float Step;
-
-        public float CircleRadius;
-
-        public SKRect Bounds;
-
-        public SKPaint Paint;
-
-        public SKPaint MidnightIndicatorPaint;
-
-        public int TotalHours;
-    }
-
-    /// <summary>
-    /// Graph line draw helper
-    /// </summary>
-    public struct GraphDraw
-    {
-        public float Step;
-
-        public SKRect Bounds;
-
-        public SKPaint Paint;
-
-        public float CornerRadius;
-
-        public SKColor FirstGradientColor;
-
-        public SKColor SecondGradientColor;
-    }
-
-    /// <summary>
-    /// Current value indicator draw helper
-    /// </summary>
-    public struct CurrentValueIndicatorDraw
-    {
-        public SKPaint Paint;
-
-        public float Radius;
-    }
-
-    /// <summary>
-    /// Max value line draw helper
-    /// </summary>
-    public struct TitleDraw
-    {
-        public SKRect Bounds;
-
-        public SKPaint LinePaint;
-
-        public float CenterY;
-    }
-
-    /// <summary>
-    /// Layout text draw helper
-    /// </summary>
-    public struct TextDraw
-    {
-        public SKPaint Paint;
-
-        public Margin Margin;
-
-        public SKRect Bounds;
-    }
-
-    /// <summary>
-    /// Max value dra helper
-    /// </summary>
-    public struct MaxValueDraw
-    {
-        public float Height;
-
-        public SKRect Bounds;
-
-        public SKPaint Paint;
-
-        public float Radius;
-    }
-
-    /// <summary>
-    /// Element margins
-    /// </summary>
-    public struct Margin
-    {
-        public float Left;
-
-        public float Top;
-
-        public float Right;
-
-        public float Bottom;
-    }
-
-    /// <summary>
-    /// Info helper for canvas
-    /// </summary>
-    public struct CanvasInfo
-    {
-        public SKCanvas Canvas;
-
-        public SKSurface Surface;
-
-        public SKImageInfo ImageInfo;
-    }
-
-    /// <summary>
-    /// Sensor label draw helper
-    /// </summary>
-    public class SensorLabelDraw
-    {
-        public SKRect Bounds;
-
-        public SKColor ActiveColor;
-
-        public SKColor NormalColor;
-
-        public bool IsActive { get; set; }
-
-        public DateTime DateTime { get; set; }
-
-        public int Airflow { get; set; }
-
-        public SKPoint Point;
-
-        public SKPaint LinePaint { get; set; }
-
-        public TextDraw IconTextDraw;
-
-        public TextDraw HourTextDraw;
-
-        public string Icon { get; set; }
-    }
-
-    /// <summary>
-    /// Store text constant to display in control
-    /// </summary>
-    public struct TextConstants
-    {
-        public string Hours;
-
-        public string Title;
-
-        public string Icon;
-    }
-
-    /// <summary>
-    /// Store size calculations, for responsive design
-    /// </summary>
-    public struct Size
-    {
-        public float _3px;
-        public float _5px;
-        public float _10px;
-        public float _15px;
-        public float _25px;
-        public float _30px;
-        public float _35px;
-        public float _40px;
-        public float _50px;
     }
 }

@@ -34,11 +34,14 @@
     <Folder Include="Helpers\" />
     <Folder Include="Helpers\Constants\" />
     <Folder Include="Models\" />
-    <Folder Include="Models\DashboardGraph\" />
-    <Folder Include="Models\ZoneGraph\" />
+    <Folder Include="Models\Dashboard\" />
+    <Folder Include="Models\History\" />
     <Folder Include="Pages\" />
     <Folder Include="Controls\History\" />
     <Folder Include="Controls\Dashboard\" />
+    <Folder Include="Controls\Models\" />
+    <Folder Include="Controls\Models\History\" />
+    <Folder Include="Controls\Models\Dashboard\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Controls\_4hGraph.xaml" />
