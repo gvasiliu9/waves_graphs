@@ -1,5 +1,5 @@
 ﻿using System;
-namespace WavesGraphs.Models
+namespace WavesGraphs.Models.Dashboard
 {
     /// <summary>
     /// Graph event model

@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading.Tasks;
 using SkiaSharp;
 using WavesGraphs.Models;
+using WavesGraphs.Models.Dashboard;
+using WavesGraphs.Models.Shared;
 using Xamarin.Forms;
 
 namespace WavesGraphs.Pages
@@ -186,19 +188,19 @@ namespace WavesGraphs.Pages
             string dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
 
             _graphValues = new GraphValues();
-            _graphValues.Airflow = new List<GraphAirflowModel>();
+            _graphValues.Airflow = new List<GraphValueModel>();
 
             for (int i = 0; i < _timeAsString.Length; i++)
             {
-                _graphValues.Airflow.Add(new GraphAirflowModel
+                _graphValues.Airflow.Add(new GraphValueModel
                 {
                     DateTime = DateTime.ParseExact(_timeAsString[i], dateFormat, CultureInfo.InvariantCulture),
-                    Airflow = _airflow[i] ?? 0,
+                    Value = _airflow[i] ?? 0,
                 });
             }
 
             // Check max airflow value, to determine graph scale
-            int maxAirflow = _graphValues.Airflow.Select(v => v.Airflow).Max();
+            int maxAirflow = _graphValues.Airflow.Select(v => v.Value).Max();
 
             if (maxAirflow <= 100)
                 _graphValues.Scale = 100;

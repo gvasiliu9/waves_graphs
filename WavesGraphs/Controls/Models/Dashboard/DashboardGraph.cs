@@ -23,24 +23,6 @@ namespace WavesGraphs.Controls.Models.DashboardGraph
     }
 
     /// <summary>
-    /// Graph line draw helper
-    /// </summary>
-    public struct GraphDraw
-    {
-        public float Step;
-
-        public SKRect Bounds;
-
-        public SKPaint Paint;
-
-        public float CornerRadius;
-
-        public SKColor FirstGradientColor;
-
-        public SKColor SecondGradientColor;
-    }
-
-    /// <summary>
     /// Current value indicator draw helper
     /// </summary>
     public struct CurrentValueIndicatorDraw
@@ -60,6 +42,24 @@ namespace WavesGraphs.Controls.Models.DashboardGraph
         public SKPaint LinePaint;
 
         public float CenterY;
+    }
+
+    /// <summary>
+    /// Graph line draw helper
+    /// </summary>
+    public struct GraphDraw
+    {
+        public float Step;
+
+        public SKRect Bounds;
+
+        public SKPaint Paint;
+
+        public float CornerRadius;
+
+        public SKColor FirstGradientColor;
+
+        public SKColor SecondGradientColor;
     }
 
     /// <summary>
@@ -114,21 +114,5 @@ namespace WavesGraphs.Controls.Models.DashboardGraph
         public string Title;
 
         public string Icon;
-    }
-
-    /// <summary>
-    /// Store size calculations, for responsive design
-    /// </summary>
-    public struct Size
-    {
-        public float _3px;
-        public float _5px;
-        public float _10px;
-        public float _15px;
-        public float _25px;
-        public float _30px;
-        public float _35px;
-        public float _40px;
-        public float _50px;
     }
 }

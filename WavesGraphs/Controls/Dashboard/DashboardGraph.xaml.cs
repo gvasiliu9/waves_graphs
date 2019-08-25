@@ -10,6 +10,7 @@ using WavesGraphs.Controls.Models.Shared;
 using WavesGraphs.Helpers;
 using WavesGraphs.Helpers.Constants;
 using WavesGraphs.Models;
+using WavesGraphs.Models.Dashboard;
 using Xamarin.Forms;
 
 namespace WavesGraphs.Controls
@@ -19,7 +20,7 @@ namespace WavesGraphs.Controls
         #region Fields
 
         // Canvas info
-        private Models.DashboardGraph.Size _size;
+        private ElementSize _size;
 
         private CanvasInfo _maxValueCanvasInfo;
         private CanvasInfo _hoursCanvasInfo;
@@ -240,7 +241,7 @@ namespace WavesGraphs.Controls
                 // Airflow
                 point.X += (_graphDraw.Step / _graphDraw.Bounds.Right) * _graphDraw.Bounds.Right;
 
-                percentageFromMaxValue = AirflowToPercentage(graphValue.Airflow);
+                percentageFromMaxValue = AirflowToPercentage(graphValue.Value);
 
                 if (percentageFromMaxValue < 0.80f)
                     point.Y = (percentageFromMaxValue * _graphDraw.Bounds.Bottom) + _graphDraw.Bounds.Top;
@@ -249,7 +250,7 @@ namespace WavesGraphs.Controls
 
                 path.LineTo(point);
 
-                lastAirflowPercentage = graphValue.Airflow;
+                lastAirflowPercentage = graphValue.Value;
             }
 
             // Close graph
@@ -316,7 +317,7 @@ namespace WavesGraphs.Controls
                 x = ((float)(totalElapsedSeconds - ((lastMeasurement - graphEvent.Time).TotalSeconds)) /
                     (float)totalElapsedSeconds) * _graphDraw.Bounds.Right;
 
-                y = (AirflowToPercentage(Values.Airflow.First(a => a.DateTime == graphEvent.Time).Airflow)
+                y = (AirflowToPercentage(Values.Airflow.First(a => a.DateTime == graphEvent.Time).Value)
                         * _graphDraw.Bounds.Bottom) + _graphDraw.Bounds.Top;
 
                 // Create new sensor label

@@ -1,6 +1,7 @@
 ﻿using System;
 using SkiaSharp;
 using WavesGraphs.Controls.Models.Shared;
+using WavesGraphs.Models.Shared;
 
 namespace WavesGraphs.Controls.Models.HistoryGraph
 {
@@ -21,8 +22,32 @@ namespace WavesGraphs.Controls.Models.HistoryGraph
 
     public struct GraphDraw
     {
+        public float Step;
+
         public SKRect Bounds;
 
-        public SKPaint Paint;
+        public SKPaint LinePaint;
+
+        public SKPaint BackgroundPaint;
+    }
+
+    public struct GraphCircleDraw
+    {
+        public SKPaint CirclePaint;
+
+        public SKPaint LinePaint;
+
+        public float Radius;
+    }
+
+    public struct CurrentValueIndicatorDraw
+    {
+        public SKRect Bounds;
+
+        public SKPaint ValueRectPaint;
+
+        public SKPaint DashedLinePaint;
+
+        public TextDraw ValueTextDraw;
     }
 }

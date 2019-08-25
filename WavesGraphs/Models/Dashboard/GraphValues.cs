@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using WavesGraphs.Models.Shared;
 
-namespace WavesGraphs.Models
+namespace WavesGraphs.Models.Dashboard
 {
     /// <summary>
     /// Store sensors values
@@ -10,7 +11,7 @@ namespace WavesGraphs.Models
     {
         public int Scale { get; set; }
 
-        public List<GraphAirflowModel> Airflow;
+        public List<GraphValueModel> Airflow;
 
         public List<GraphEventModel> Events;
     }

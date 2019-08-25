@@ -36,9 +36,13 @@
                     <!--Temperature-->
                     <controls:HistoryGraph
                         x:Name="temperatureGraph"
+                        BindingContext="{x:Reference timelineSlider}"
                         Title="Temperature"
-                        Description="Indoor" />
-
+                        MeasurementUnit="°C"
+                        Description="Indoor"
+                        ShowValueFor="{Binding Path=Time}"
+                        ShowValueIndicator="{Binding Path=IsMoving}"
+                        Percentage="{Binding Path=Value}" />
                 </StackLayout>
 
             </ScrollView>

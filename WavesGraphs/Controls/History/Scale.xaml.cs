@@ -5,7 +5,9 @@ using System.Runtime.CompilerServices;
 using SkiaSharp;
 using WavesGraphs.Controls.Models.History.Scale;
 using WavesGraphs.Controls.Models.Shared;
+using WavesGraphs.Helpers;
 using WavesGraphs.Models.History;
+using WavesGraphs.Models.Shared;
 using Xamarin.Forms;
 
 namespace WavesGraphs.Controls
@@ -50,6 +52,9 @@ namespace WavesGraphs.Controls
         }
 
         #region Methods
+
+        public ScaleIntervalModel GetScaleInterval(float value)
+            => ScaleIntervals.FirstOrDefault(i => value >= i.From && value <= i.To);
 
         void InitPaints()
         {
@@ -112,8 +117,8 @@ namespace WavesGraphs.Controls
                 _scaleColorsDraw.Paint.Color = SKColor.Parse(scaleInterval.Color);
 
                 // Calculate percentage
-                startPercentage = GetPercentage(scaleInterval.From, range);
-                endPercentage = GetPercentage(scaleInterval.To, range);
+                startPercentage = SkiaSharpHelper.GetPercentage(scaleInterval.From, range);
+                endPercentage = SkiaSharpHelper.GetPercentage(scaleInterval.To, range);
 
                 // Draw color
                 startPoint.Y = _scaleColorsDraw.Bounds.Bottom - (height * startPercentage);
@@ -136,15 +141,6 @@ namespace WavesGraphs.Controls
 
             separatorLinesPath.Dispose();
             dottedLinesPath.Dispose();
-        }
-
-        float GetPercentage(float input, Range range)
-        {
-            float x = range.To - range.From;
-
-            float result = (100 * (input - range.From)) / x;
-
-            return result / 100;
         }
 
         void Calculate(SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs e)

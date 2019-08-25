@@ -29,6 +29,8 @@ namespace WavesGraphs.Controls
         TimeLineDraw _timeLineDraw;
         ThumbDraw _thumbDraw;
 
+        ElementSize _size;
+
         // Touch tracking
         Touch _touch;
 
@@ -64,6 +66,16 @@ namespace WavesGraphs.Controls
             get => (DateTime)GetValue(TimeProperty);
 
             set => SetValue(TimeProperty, value);
+        }
+
+        public static readonly BindableProperty IsMovingProperty = BindableProperty
+            .Create(nameof(IsMoving), typeof(bool), typeof(TimelineSlider), default(bool));
+
+        public bool IsMoving
+        {
+            get => (bool)GetValue(IsMovingProperty);
+
+            set => SetValue(IsMovingProperty, value);
         }
 
         #endregion
@@ -117,6 +129,8 @@ namespace WavesGraphs.Controls
 
             GetTime();
 
+            IsMoving = true;
+
             // Check if touch is in bounds
             if (IsThumbInBounds())
             {
@@ -135,7 +149,7 @@ namespace WavesGraphs.Controls
 
         bool IsThumbInBounds()
         {
-            var leftBound = _touch.Current.X - _thumbDraw.Radius;
+            var leftBound = _touch.Current.X - (_thumbDraw.Radius + _size._15px);
             var rightBound = _touch.Current.X + _thumbDraw.Radius;
 
             return rightBound <= _timeLineDraw.Bounds.Right && leftBound >= _timeLineDraw.Bounds.Left;
@@ -205,31 +219,31 @@ namespace WavesGraphs.Controls
 
         void Calculate(SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs e)
         {
-            float _3px = e.Info.Width * 0.004109589041096f;
-            float _13px = e.Info.Width * 0.017808219178082f;
-            float _15px = e.Info.Width * 0.020547945205479f;
-            float _20px = e.Info.Width * 0.027397260273973f;
+            _size._3px = e.Info.Width * 0.004109589041096f;
+            _size._13px = e.Info.Width * 0.017808219178082f;
+            _size._15px = e.Info.Width * 0.020547945205479f;
+            _size._20px = e.Info.Width * 0.027397260273973f;
 
             // Timeline bounds
-            _timeLineDraw.Bounds.Top = _15px;
+            _timeLineDraw.Bounds.Top = _size._15px;
             _timeLineDraw.Bounds.Left = 0;
-            _timeLineDraw.Bounds.Bottom = e.Info.Height - _15px;
+            _timeLineDraw.Bounds.Bottom = e.Info.Height - _size._15px;
             _timeLineDraw.Bounds.Right = e.Info.Width * 0.8f;
 
             // Get timeline segments
             GetTimelineSegments();
 
             // Timeline
-            _timeLineDraw.HourCircleRadius = _3px;
-            _timeLineDraw.DayLineHeight = _13px;
-            _timeLineDraw.DayLinePaint.StrokeWidth = _3px;
+            _timeLineDraw.HourCircleRadius = _size._3px;
+            _timeLineDraw.DayLineHeight = _size._13px;
+            _timeLineDraw.DayLinePaint.StrokeWidth = _size._3px;
 
             // Thumb
             _thumbDraw.Radius = _timeLineDraw.Bounds.Height / 2;
             _thumbDraw.Point = new SKPoint(_timeLineDraw.Bounds.Right - _thumbDraw.Radius,
                 _timeLineDraw.Bounds.MidY);
 
-            _thumbDraw.TextDraw.Paint.TextSize = _20px;
+            _thumbDraw.TextDraw.Paint.TextSize = _size._20px;
 
             _touch.Current.X = _timeLineDraw.Bounds.Right;
         }
@@ -245,14 +259,16 @@ namespace WavesGraphs.Controls
 
         void GetTime()
         {
+            float touchX = _touch.Current.X;
+
             TimelineSegment timelineSegment = _timelineSegments
-                .FirstOrDefault(s => _touch.Current.X >= s.Bounds.Left && _touch.Current.X <= s.Bounds.Right);
+                .FirstOrDefault(s => touchX >= s.Bounds.Left && touchX <= s.Bounds.Right);
 
             if (timelineSegment == null)
                 return;
 
             int index = (int)((timelineSegment.Hours.Count() - 1) *
-                (1 - ((timelineSegment.Bounds.Right - _touch.Current.X) / timelineSegment.Bounds.Width)));
+                (1 - ((timelineSegment.Bounds.Right - touchX) / timelineSegment.Bounds.Width)));
 
             Time = timelineSegment.Hours[index];
 
@@ -293,23 +309,21 @@ namespace WavesGraphs.Controls
                 // Add timeline
                 _timelineSegments.Add(new TimelineSegment
                 {
-                    Intervals = intervals,
                     Hours = hours.ToList(),
                 });
             }
 
             // Calculate step
-            int totalIntervals = _timelineSegments.Select(s => s.Intervals).Sum() + _timelineSegments.Count();
-
-            _timeLineDraw.Step = (float)Math.Round(_timeLineDraw.Bounds.Right / totalIntervals);
+            _timeLineDraw.Step = _timeLineDraw.Bounds.Right / Period.Count();
         }
 
         void DrawWeekTimeline()
         {
             // Init point
             var point = new SKPoint();
-            point.X = _timeLineDraw.Step;
             point.Y = _timeLineDraw.Bounds.MidY;
+
+            int hourIndex;
 
             // Draw segments
             foreach (var timelineSegment in _timelineSegments)
@@ -317,18 +331,19 @@ namespace WavesGraphs.Controls
                 // Left bound
                 timelineSegment.Bounds.Left = point.X;
 
-                // Draw day line
-                if (timelineSegment != _timelineSegments.First())
-                {
-                    DrawDayLine(point);
-                    point.X += _timeLineDraw.Step;
-                }
+                // Draw hours circle
+                hourIndex = 0;
 
-                // Draw hours
-                for (int i = 0; i < timelineSegment.Intervals; i++)
+                foreach (var hour in timelineSegment.Hours)
                 {
-                    DrawHourCircle(point);
                     point.X += _timeLineDraw.Step;
+
+                    hourIndex++;
+
+                    if (hour == timelineSegment.Hours.Last() && timelineSegment != _timelineSegments.Last())
+                        DrawDayLine(point);
+                    else if (hourIndex % 8 == 0)
+                        DrawHourCircle(point);
                 }
 
                 // Right bound
@@ -353,11 +368,8 @@ namespace WavesGraphs.Controls
             // Get hours
             timelineSegment.Hours = Period;
 
-            // Calculate intervals
-            int totalIntervals = (int)Math.Round((Period.Last() - Period.First()).TotalHours);
-
             // Calculate step
-            _timeLineDraw.Step = (float)Math.Round(_timeLineDraw.Bounds.Right / totalIntervals);
+            _timeLineDraw.Step = _timeLineDraw.Bounds.Right / Period.Count();
 
             // Add timeline segment
             _timelineSegments.Add(timelineSegment);
@@ -367,18 +379,15 @@ namespace WavesGraphs.Controls
         {
             // Init point
             var point = new SKPoint();
-            point.X = _timeLineDraw.Step;
+            //point.X = _timeLineDraw.Step;
             point.Y = _timeLineDraw.Bounds.MidY;
 
             // Draw hours
             foreach (DateTime hour in _timelineSegments.First().Hours)
             {
-                if (hour.Minute != 0)
-                    continue;
-
                 if (hour.TimeOfDay.Ticks == 0)
                     DrawDayLine(point);
-                else
+                else if (hour.Minute == 0)
                     DrawHourCircle(point);
 
                 point.X += _timeLineDraw.Step;
@@ -443,7 +452,10 @@ namespace WavesGraphs.Controls
 
             if (_touch.Current.X < _timeLineDraw.Bounds.Left
                 || _touch.Current.X > _timeLineDraw.Bounds.Right)
+            {
+                IsMoving = false;
                 return;
+            }
 
             switch (args.Type)
             {
@@ -485,6 +497,10 @@ namespace WavesGraphs.Controls
                 case TouchActionType.Cancelled:
                     {
                         _touch.Id = -1;
+
+                        IsMoving = false;
+
+                        //Time = Period.Last();
                     }
                     break;
             }
@@ -506,6 +522,8 @@ namespace WavesGraphs.Controls
 
                 // Init canvases
                 timelineCanvas.InvalidateSurface();
+
+                Time = Period.Last();
             }
         }
 

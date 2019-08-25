@@ -2,11 +2,12 @@
 using System.IO;
 using System.Reflection;
 using SkiaSharp;
+using WavesGraphs.Models.Shared;
 
 namespace WavesGraphs.Helpers
 {
     public static class SkiaSharpHelper
-    {    
+    {
         /// <summary>
         /// Load embeded font
         /// </summary>
@@ -31,6 +32,15 @@ namespace WavesGraphs.Helpers
                     }
                 }
             }
+        }
+
+        public static float GetPercentage(float input, Range range)
+        {
+            float x = range.To - range.From;
+
+            float result = (100 * (input - range.From)) / x;
+
+            return result / 100;
         }
     }
 }

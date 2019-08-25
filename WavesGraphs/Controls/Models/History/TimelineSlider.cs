@@ -13,8 +13,6 @@ namespace WavesGraphs.Controls.Models.History.TimelineSlider
 
     public class TimelineSegment
     {
-        public int Intervals;
-
         public List<DateTime> Hours;
 
         public SKRect Bounds;

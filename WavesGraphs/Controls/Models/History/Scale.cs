@@ -25,11 +25,4 @@ namespace WavesGraphs.Controls.Models.History.Scale
 
         public SKPoint End;
     }
-
-    public struct Range
-    {
-        public float From;
-
-        public float To;
-    }
 }

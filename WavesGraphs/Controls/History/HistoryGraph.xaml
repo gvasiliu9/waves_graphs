@@ -17,6 +17,12 @@
 
             <!--Graph canvas-->
             <skia:SKCanvasView
+                x:Name="textCanvas"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All" />
+
+            <!--Graph canvas-->
+            <skia:SKCanvasView
                 x:Name="graphCanvas"
                 AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
                 AbsoluteLayout.LayoutFlags="All" />
@@ -27,7 +33,7 @@
                 AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
                 AbsoluteLayout.LayoutFlags="All" />
 
-            <!--Value canvas-->
+            <!--Graph circle canvas-->
             <skia:SKCanvasView
                 x:Name="valueCanvas"
                 AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
