@@ -18,6 +18,9 @@ namespace WavesGraphs.Controls
 
         TimelineType _type;
 
+        TimelineSegment _currentTimelineSegment;
+        TimelineSegment _previousTimelineSegment;
+
         // Canvas in
         CanvasInfo _timelineCanvasInfo;
         CanvasInfo _thumbCanvasInfo;
@@ -285,16 +288,18 @@ namespace WavesGraphs.Controls
         {
             float touchX = _touch.Current.X;
 
-            TimelineSegment timelineSegment = _timelineSegments
+            _currentTimelineSegment = _timelineSegments
                 .FirstOrDefault(s => touchX >= s.Bounds.Left && touchX <= s.Bounds.Right);
 
-            if (timelineSegment == null)
+            if (_currentTimelineSegment == null)
                 return;
 
-            int index = (int)((timelineSegment.Hours.Count() - 1) *
-                (1 - ((timelineSegment.Bounds.Right - touchX) / timelineSegment.Bounds.Width)));
+            int index = (int)((_currentTimelineSegment.Hours.Count() - 1) *
+                (1 - ((_currentTimelineSegment.Bounds.Right - touchX) / _currentTimelineSegment.Bounds.Width)));
 
-            Time = timelineSegment.Hours[index];
+            Time = _currentTimelineSegment.Hours[index];
+
+            Vibrate();
 
             thumbTextCanvas.InvalidateSurface();
         }
@@ -324,6 +329,23 @@ namespace WavesGraphs.Controls
                 }
                 ,
                 _timeLabelTextDraw.Paint);
+        }
+
+        void Vibrate()
+        {
+            try
+            {
+                if (_currentTimelineSegment != _previousTimelineSegment)
+                {
+                    Xamarin.Essentials.Vibration.Vibrate(15);
+
+                    _previousTimelineSegment = _currentTimelineSegment;
+                }
+            }
+            catch
+            {
+                Debug.WriteLine("ex: Vibration is not supported...");
+            }
         }
 
         #endregion
