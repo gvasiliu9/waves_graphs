@@ -9,41 +9,43 @@
 
     <ContentView.Content>
 
-            <!--Graph canvas view-->
-            <AbsoluteLayout>
+        <!--Graph canvas view-->
+        <AbsoluteLayout>
 
-                <!--Touch tracking-->
-                <AbsoluteLayout.Effects>
+            <!--Touch tracking-->
+            <AbsoluteLayout.Effects>
 
-                    <tt:TouchEffect Capture="True" TouchAction="OnTouch" />
+                <tt:TouchEffect
+                    Capture="True"
+                    TouchAction="OnTouch" />
 
-                </AbsoluteLayout.Effects>
+            </AbsoluteLayout.Effects>
 
-                <!--Max value line-->
-                <skia:SKCanvasView
-                    x:Name="maxValueCanvas"
-                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
-                    AbsoluteLayout.LayoutFlags="All"/>
+            <!--Max value line-->
+            <skia:SKCanvasView
+                x:Name="maxValueCanvas"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All" />
 
-                <!--Hours line-->
-                <skia:SKCanvasView
-                    x:Name="hoursCanvas"
-                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
-                    AbsoluteLayout.LayoutFlags="All"/>
+            <!--Hours line-->
+            <skia:SKCanvasView
+                x:Name="hoursCanvas"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All" />
 
-                <!--Graph-->
-                <skia:SKCanvasView
-                    x:Name="graphCanvas"
-                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
-                    AbsoluteLayout.LayoutFlags="All"/>
+            <!--Graph-->
+            <skia:SKCanvasView
+                x:Name="graphCanvas"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All" />
 
-                <!--Sensor labels-->
-                <skia:SKCanvasView
-                    x:Name="sensorLabelsCanvas"
-                    AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
-                    AbsoluteLayout.LayoutFlags="All"/>
+            <!--Sensor labels-->
+            <skia:SKCanvasView
+                x:Name="sensorLabelsCanvas"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All" />
 
-            </AbsoluteLayout>
+        </AbsoluteLayout>
 
     </ContentView.Content>
 

@@ -45,15 +45,4 @@ namespace WavesGraphs.Controls.Models.History.TimelineSlider
 
         public TextDraw TextDraw;
     }
-
-    public struct Touch
-    {
-        public long Id;
-
-        public SKPoint Current;
-
-        public SKPoint Previous;
-
-        public SKMatrix Matrix;
-    }
 }

@@ -8,6 +8,7 @@ using TouchTracking;
 using WavesGraphs.Controls.Models.Shared;
 using Xamarin.Forms;
 using WavesGraphs.Controls.Models.History.TimelineSlider;
+using WavesGraphs.Helpers;
 
 namespace WavesGraphs.Controls
 {
@@ -17,7 +18,7 @@ namespace WavesGraphs.Controls
 
         TimelineType _type;
 
-        // Canvas info
+        // Canvas in
         CanvasInfo _timelineCanvasInfo;
         CanvasInfo _thumbCanvasInfo;
         CanvasInfo _thumbTextCanvasInfo;
@@ -28,6 +29,7 @@ namespace WavesGraphs.Controls
         // Draw helpers
         TimeLineDraw _timeLineDraw;
         ThumbDraw _thumbDraw;
+        TextDraw _timeLabelTextDraw;
 
         ElementSize _size;
 
@@ -78,6 +80,16 @@ namespace WavesGraphs.Controls
             set => SetValue(IsMovingProperty, value);
         }
 
+        public static readonly BindableProperty ThumbPositionProperty = BindableProperty
+            .Create(nameof(ThumbPosition), typeof(float), typeof(TimelineSlider), default(float));
+
+        public float ThumbPosition
+        {
+            get => (float)GetValue(ThumbPositionProperty);
+
+            set => SetValue(ThumbPositionProperty, value);
+        }
+
         #endregion
 
         public TimelineSlider()
@@ -95,6 +107,7 @@ namespace WavesGraphs.Controls
 
         void InitPaints()
         {
+            // Timeline
             _timeLineDraw.HourCirclePaint = new SKPaint
             {
                 Color = SKColor.Parse("#D4D4D4"),
@@ -108,6 +121,7 @@ namespace WavesGraphs.Controls
                 IsAntialias = true
             };
 
+            // Thumb
             _thumbDraw.Paint = new SKPaint
             {
                 Color = SKColor.Parse("#494948"),
@@ -120,13 +134,18 @@ namespace WavesGraphs.Controls
                 IsAntialias = true,
                 FakeBoldText = true
             };
+
+            // Timeline label
+            _timeLabelTextDraw.Paint = new SKPaint
+            {
+                Color = SKColor.Parse("#D4D4D4"),
+                IsAntialias = true,
+                FakeBoldText = true,
+            };
         }
 
         void TouchAction()
         {
-            // Calculate percentage
-            GetPercentage();
-
             GetTime();
 
             IsMoving = true;
@@ -155,23 +174,33 @@ namespace WavesGraphs.Controls
             return rightBound <= _timeLineDraw.Bounds.Right && leftBound >= _timeLineDraw.Bounds.Left;
         }
 
-        bool IsMaxRight()
-            => _touch.Current.X == _timeLineDraw.Bounds.Right;
-
         void UpdateText()
         {
-            if (IsMaxRight())
-                DrawThumbText("Now");
-            else if (_type == TimelineType.Week)
-                DrawThumbText(Time.DayOfWeek.ToString().Substring(0, 3));
-
-            if (IsMaxRight())
+            // Initial text
+            if (!IsMoving)
             {
+                // Thumb text
+                DrawThumbText("Now");
+
+                // Time label text
                 switch (_type)
                 {
-                    case TimelineType.Day: timeLabel.Text = "24H"; break;
-                    case TimelineType.Week: timeLabel.Text = "7D"; break;
+                    case TimelineType.Day:
+                        DrawTimelineLabelText("24H");
+                        break;
+                    case TimelineType.Week:
+                        DrawTimelineLabelText("7D");
+                        break;
                 }
+            }
+            else
+            {
+                // Draw selected time
+                DrawTimelineLabelText(Time.ToString("HH:mm"));
+
+                // Week name
+                if (_type == TimelineType.Week)
+                    DrawThumbText(Time.DayOfWeek.ToString().Substring(0, 3));
             }
         }
 
@@ -208,15 +237,6 @@ namespace WavesGraphs.Controls
             _timelineCanvasInfo.Canvas.DrawLine(point0, point1, _timeLineDraw.DayLinePaint);
         }
 
-        SKPoint ToPixel(float x, float y)
-        {
-            return new SKPoint((float)(thumbCanvas.CanvasSize.Width * x / thumbCanvas.Width)
-                , (float)(thumbCanvas.CanvasSize.Height * y / thumbCanvas.Height));
-        }
-
-        void GetPercentage()
-            => Value = (1 - Math.Round((_touch.Current.X / _timeLineDraw.Bounds.Right), 2));
-
         void Calculate(SkiaSharp.Views.Forms.SKPaintSurfaceEventArgs e)
         {
             _size._3px = e.Info.Width * 0.004109589041096f;
@@ -228,7 +248,7 @@ namespace WavesGraphs.Controls
             _timeLineDraw.Bounds.Top = _size._15px;
             _timeLineDraw.Bounds.Left = 0;
             _timeLineDraw.Bounds.Bottom = e.Info.Height - _size._15px;
-            _timeLineDraw.Bounds.Right = e.Info.Width * 0.8f;
+            _timeLineDraw.Bounds.Right = e.Info.Width * 0.80f;
 
             // Get timeline segments
             GetTimelineSegments();
@@ -243,9 +263,13 @@ namespace WavesGraphs.Controls
             _thumbDraw.Point = new SKPoint(_timeLineDraw.Bounds.Right - _thumbDraw.Radius,
                 _timeLineDraw.Bounds.MidY);
 
-            _thumbDraw.TextDraw.Paint.TextSize = _size._20px;
+            _thumbDraw.TextDraw.Paint.TextSize = (_thumbDraw.Radius / 2);
 
             _touch.Current.X = _timeLineDraw.Bounds.Right;
+
+            // Timelabel text
+            _timeLabelTextDraw.Paint.TextSize = _timeLineDraw.Bounds.Height / 2.75f;
+            _timeLabelTextDraw.Margin.Right = _size._20px;
         }
 
         void GetTimelineSegments()
@@ -272,8 +296,7 @@ namespace WavesGraphs.Controls
 
             Time = timelineSegment.Hours[index];
 
-            // Update time lable text
-            timeLabel.Text = Time.ToString("HH:mm");
+            thumbTextCanvas.InvalidateSurface();
         }
 
         void DrawTimeline()
@@ -285,6 +308,24 @@ namespace WavesGraphs.Controls
             }
         }
 
+        void DrawTimelineLabelText(string text)
+        {
+            // Measure text
+            _timeLabelTextDraw.Paint.MeasureText(text, ref _timeLabelTextDraw.Bounds);
+
+            // Draw
+            _thumbTextCanvasInfo.Canvas.DrawText(
+                text,
+                new SKPoint
+                {
+                    X = (_timelineCanvasInfo.ImageInfo.Width - _timeLabelTextDraw.Margin.Right)
+                        - _timeLabelTextDraw.Bounds.Width,
+                    Y = _timeLineDraw.Bounds.MidY + Math.Abs(_timeLabelTextDraw.Bounds.MidY)
+                }
+                ,
+                _timeLabelTextDraw.Paint);
+        }
+
         #endregion
 
         #region Week
@@ -294,18 +335,9 @@ namespace WavesGraphs.Controls
             // Init
             _timelineSegments = new List<TimelineSegment>();
 
-            int intervals;
-
-            DateTime start;
-
             // Get timeline hours
             foreach (var hours in Period.GroupBy(p => new { p.Day, p.Month }).Select(group => group))
             {
-                start = hours.First();
-
-                // Calculate day interval
-                intervals = (int)Math.Ceiling((double)Period.Where(p => p.Day == start.Day).Count() / 8);
-
                 // Add timeline
                 _timelineSegments.Add(new TimelineSegment
                 {
@@ -329,7 +361,7 @@ namespace WavesGraphs.Controls
             foreach (var timelineSegment in _timelineSegments)
             {
                 // Left bound
-                timelineSegment.Bounds.Left = point.X;
+                timelineSegment.Bounds.Left = (float)Math.Round(point.X);
 
                 // Draw hours circle
                 hourIndex = 0;
@@ -342,12 +374,15 @@ namespace WavesGraphs.Controls
 
                     if (hour == timelineSegment.Hours.Last() && timelineSegment != _timelineSegments.Last())
                         DrawDayLine(point);
-                    else if (hourIndex % 8 == 0)
+                    else if (hourIndex % 6 == 0 &&
+                        (timelineSegment.Hours.Last() - timelineSegment.Hours.First()).TotalHours >= 8)
+                    {
                         DrawHourCircle(point);
+                    }
                 }
 
                 // Right bound
-                timelineSegment.Bounds.Right = point.X;
+                timelineSegment.Bounds.Right = (float)Math.Round(point.X);
             }
         }
 
@@ -362,8 +397,8 @@ namespace WavesGraphs.Controls
 
             var timelineSegment = new TimelineSegment();
 
-            timelineSegment.Bounds.Left = _timeLineDraw.Bounds.Left;
-            timelineSegment.Bounds.Right = _timeLineDraw.Bounds.Right;
+            timelineSegment.Bounds.Left = (float)Math.Round(_timeLineDraw.Bounds.Left);
+            timelineSegment.Bounds.Right = (float)Math.Round(_timeLineDraw.Bounds.Right);
 
             // Get hours
             timelineSegment.Hours = Period;
@@ -448,14 +483,7 @@ namespace WavesGraphs.Controls
         void OnTouch(object sender, TouchActionEventArgs args)
         {
             // Convert touch point to pixel point
-            _touch.Current = ToPixel(args.Location.X, args.Location.Y);
-
-            if (_touch.Current.X < _timeLineDraw.Bounds.Left
-                || _touch.Current.X > _timeLineDraw.Bounds.Right)
-            {
-                IsMoving = false;
-                return;
-            }
+            _touch.Current = SkiaSharpHelper.ToPixel(args.Location.X, args.Location.Y, ref timelineCanvas);
 
             switch (args.Type)
             {
@@ -497,10 +525,6 @@ namespace WavesGraphs.Controls
                 case TouchActionType.Cancelled:
                     {
                         _touch.Id = -1;
-
-                        IsMoving = false;
-
-                        //Time = Period.Last();
                     }
                     break;
             }
@@ -513,9 +537,6 @@ namespace WavesGraphs.Controls
             // Period
             if (propertyName == PeriodProperty.PropertyName)
             {
-                // Update time label text
-                timeLabel.Text = Period.Last().ToString("HH:mm");
-
                 // Get timeline type
                 if ((Period.Last() - Period.First()).TotalDays > 1)
                     _type = TimelineType.Week;
@@ -524,6 +545,14 @@ namespace WavesGraphs.Controls
                 timelineCanvas.InvalidateSurface();
 
                 Time = Period.Last();
+            }
+
+            // Thumb position
+            if (propertyName == ThumbPositionProperty.PropertyName)
+            {
+                _touch.Current.X = ThumbPosition;
+
+                TouchAction();
             }
         }
 

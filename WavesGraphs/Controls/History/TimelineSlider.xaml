@@ -13,8 +13,9 @@
             <!--Touch tracking-->
             <AbsoluteLayout.Effects>
 
-                <tt:TouchEffect Capture="True"
-                                TouchAction="OnTouch" />
+                <tt:TouchEffect
+                    Capture="True"
+                    TouchAction="OnTouch" />
 
             </AbsoluteLayout.Effects>
 
@@ -35,15 +36,6 @@
                 x:Name="thumbTextCanvas"
                 AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
                 AbsoluteLayout.LayoutFlags="All" />
-
-            <!--Time label-->
-            <Label
-                x:Name="timeLabel"
-                FontAttributes="Bold"
-                FontSize="Medium"
-                TextColor="#D4D4D4"
-                AbsoluteLayout.LayoutBounds="0.97, 0.5"
-                AbsoluteLayout.LayoutFlags="PositionProportional" />
 
         </AbsoluteLayout>
 

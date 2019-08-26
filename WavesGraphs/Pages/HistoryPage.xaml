@@ -27,30 +27,29 @@
             </StackLayout>
 
             <!--Graphs-->
-            <ScrollView
+            <StackLayout
                 Grid.Row="1"
                 Margin="5,0">
 
-                <StackLayout>
+                <!--Temperature-->
+                <controls:HistoryGraph
+                    x:Name="temperatureGraph"
+                    BindingContext="{x:Reference timelineSlider}"
+                    Title="Temperature"
+                    MeasurementUnit="°C"
+                    Description="Indoor"
+                    ShowValueFor="{Binding Path=Time}"
+                    ShowValueIndicator="{Binding Path=IsMoving}"
+                    Percentage="{Binding Path=Value}" />
 
-                    <!--Temperature-->
-                    <controls:HistoryGraph
-                        x:Name="temperatureGraph"
-                        BindingContext="{x:Reference timelineSlider}"
-                        Title="Temperature"
-                        MeasurementUnit="°C"
-                        Description="Indoor"
-                        ShowValueFor="{Binding Path=Time}"
-                        ShowValueIndicator="{Binding Path=IsMoving}"
-                        Percentage="{Binding Path=Value}" />
-                </StackLayout>
-
-            </ScrollView>
+            </StackLayout>
 
             <!--Timeline-->
             <controls:TimelineSlider
                 x:Name="timelineSlider"
                 Grid.Row="2"
+                BindingContext="{x:Reference temperatureGraph}"
+                ThumbPosition="{Binding Path=ValueIndicatorPosition}"
                 BackgroundColor="White" />
 
         </Grid>

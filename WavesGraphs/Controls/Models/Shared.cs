@@ -60,4 +60,15 @@ namespace WavesGraphs.Controls.Models.Shared
         public float _40px;
         public float _50px;
     }
+
+    public struct Touch
+    {
+        public long Id;
+
+        public SKPoint Current;
+
+        public SKPoint Previous;
+
+        public SKMatrix Matrix;
+    }
 }

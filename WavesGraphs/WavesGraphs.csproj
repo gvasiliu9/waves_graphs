@@ -43,6 +43,7 @@
     <Folder Include="Controls\Models\History\" />
     <Folder Include="Controls\Models\Dashboard\" />
     <Folder Include="Models\Shared\" />
+    <Folder Include="Controls\Renderers\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Controls\_4hGraph.xaml" />

@@ -11,6 +11,7 @@ using WavesGraphs.Models.Shared;
 using System.Linq;
 using WavesGraphs.Helpers;
 using System.Diagnostics;
+using TouchTracking;
 using WavesGraphs.Helpers.Constants;
 
 namespace WavesGraphs.Controls
@@ -36,6 +37,9 @@ namespace WavesGraphs.Controls
 
         GraphValueModel _lastValue;
         ScaleIntervalModel _lastValueScale;
+
+        // Touch tracking
+        Touch _touch;
 
         #endregion
 
@@ -151,6 +155,16 @@ namespace WavesGraphs.Controls
             set => SetValue(ValueProperty, value);
         }
 
+        public static readonly BindableProperty ValueIndicatorPositionProperty = BindableProperty
+            .Create(nameof(ValueIndicatorPosition), typeof(float), typeof(HistoryGraph), default(float));
+
+        public float ValueIndicatorPosition
+        {
+            get => (float)GetValue(ValueIndicatorPositionProperty);
+
+            set => SetValue(ValueIndicatorPositionProperty, value);
+        }
+
         #endregion
 
         public HistoryGraph()
@@ -165,6 +179,11 @@ namespace WavesGraphs.Controls
         }
 
         #region Methods
+
+        void TouchAction()
+        {
+            ValueIndicatorPosition = _touch.Current.X;
+        }
 
         void InitPaints()
         {
@@ -257,6 +276,7 @@ namespace WavesGraphs.Controls
             _size._8px = screenWidth * 0.010666666666667f;
             _size._10px = screenWidth * 0.013333333333333f;
             _size._15px = screenWidth * 0.02f;
+            _size._25px = screenWidth * 0.033333333333333f;
             _size._30px = screenWidth * 0.04f;
 
             // Title bounds
@@ -288,18 +308,18 @@ namespace WavesGraphs.Controls
 
             // Title text
             _titleDraw.IconTextDraw.Paint.TextSize = _titleDraw.Bounds.Height / 2f;
-            _titleDraw.IconTextDraw.Margin.Left = 15;
+            _titleDraw.IconTextDraw.Margin.Left = _size._30px;
 
             _titleDraw.GraphNameTextDraw.Paint.TextSize = _titleDraw.Bounds.Height / 3.5f;
-            _titleDraw.GraphNameTextDraw.Margin.Left = 20;
+            _titleDraw.GraphNameTextDraw.Margin.Left = _size._25px;
 
             _titleDraw.DescriptionTextDraw.Paint.TextSize = _titleDraw.Bounds.Height / 5f;
 
             _titleDraw.LevelTextDraw.Paint.TextSize = _titleDraw.GraphNameTextDraw.Paint.TextSize;
-            _titleDraw.LevelTextDraw.Margin.Right = 15;
+            _titleDraw.LevelTextDraw.Margin.Right = _size._30px;
 
             _titleDraw.ValueTextDraw.Paint.TextSize = _titleDraw.DescriptionTextDraw.Paint.TextSize;
-            _titleDraw.ValueTextDraw.Margin.Right = 15;
+            _titleDraw.ValueTextDraw.Margin.Right = _size._30px;
         }
 
         #region Draws
@@ -394,7 +414,7 @@ namespace WavesGraphs.Controls
             DrawGraphCircle(point);
 
             // Draw current value
-            if (graphValueModel.DateTime != _lastValue.DateTime)
+            if (ShowValueIndicator)
             {
                 // Set indicator color
                 _currentValueIndicatorDraw.ValueRectPaint.Color =
@@ -403,8 +423,6 @@ namespace WavesGraphs.Controls
 
                 // Draw current value indicator
                 DrawCurrentValueIndicator(point);
-
-                // Set level color
             }
         }
 
@@ -710,6 +728,54 @@ namespace WavesGraphs.Controls
 
             // Draw
             UpdateGraphCircle();
+        }
+
+        #endregion
+
+        #region Touch Tracking
+
+        void OnTouch(object sender, TouchActionEventArgs args)
+        {
+            // Convert touch point to pixel point
+            _touch.Current = SkiaSharpHelper.ToPixel(args.Location.X, args.Location.Y, ref valueCanvas);
+
+            switch (args.Type)
+            {
+                case TouchActionType.Pressed:
+                    _touch.Matrix = SKMatrix.MakeIdentity();
+
+                    _currentValueIndicatorDraw.Bounds = _touch.Matrix
+                        .MapRect(_currentValueIndicatorDraw.Bounds);
+
+                    // Check if the inner circle was touched
+                    if (_currentValueIndicatorDraw.Bounds.Contains(_touch.Current))
+                    {
+                        _touch.Id = args.Id;
+                        _touch.Previous = _touch.Current;
+                    }
+
+                    break;
+
+                case TouchActionType.Moved:
+                    if (_touch.Id == args.Id)
+                    {
+                        // Adjust the matrix for the new position
+                        _touch.Matrix.TransX += _touch.Current.X - _touch.Previous.X;
+                        _touch.Matrix.TransY += _touch.Current.Y - _touch.Previous.Y;
+                        _touch.Previous = _touch.Current;
+
+                        TouchAction();
+                    }
+
+                    break;
+
+                case TouchActionType.Released:
+                case TouchActionType.Cancelled:
+                    {
+                        _touch.Id = -1;
+                    }
+                    break;
+            }
         }
 
         #endregion

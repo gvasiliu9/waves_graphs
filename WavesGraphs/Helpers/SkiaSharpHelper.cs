@@ -2,6 +2,7 @@
 using System.IO;
 using System.Reflection;
 using SkiaSharp;
+using SkiaSharp.Views.Forms;
 using WavesGraphs.Models.Shared;
 
 namespace WavesGraphs.Helpers
@@ -41,6 +42,12 @@ namespace WavesGraphs.Helpers
             float result = (100 * (input - range.From)) / x;
 
             return result / 100;
+        }
+
+        public static SKPoint ToPixel(float x, float y, ref SKCanvasView canvasView)
+        {
+            return new SKPoint((float)Math.Round((canvasView.CanvasSize.Width * x / canvasView.Width))
+                , (float)Math.Round((canvasView.CanvasSize.Height * y / canvasView.Height)));
         }
     }
 }
