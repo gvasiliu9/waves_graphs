@@ -7,11 +7,15 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Rg.Plugins.Popup.Extensions;
 using SkiaSharp;
+using WavesGraphs.Controls;
 using WavesGraphs.Models;
 using WavesGraphs.Models.Dashboard;
 using WavesGraphs.Models.Shared;
+using WavesGraphs.Popups;
 using Xamarin.Forms;
+using static WavesGraphs.Models.Dashboard.Enums;
 
 namespace WavesGraphs.Pages
 {
@@ -20,225 +24,65 @@ namespace WavesGraphs.Pages
     {
         #region Fields
 
-        private GraphValues _graphValues;
-
-        private string[] _timeAsString = {
-            "2019-08-18T23:59:59Z",
-            "2019-08-19T00:00:00Z",
-            "2019-08-19T00:15:00Z",
-            "2019-08-19T00:30:00Z",
-            "2019-08-19T00:45:00Z",
-            "2019-08-19T01:00:00Z",
-            "2019-08-19T01:15:00Z",
-            "2019-08-19T01:30:00Z",
-            "2019-08-19T01:45:00Z",
-            "2019-08-19T02:00:00Z",
-            "2019-08-19T02:15:00Z",
-            "2019-08-19T02:30:00Z",
-            "2019-08-19T02:45:00Z",
-            "2019-08-19T03:00:00Z",
-            "2019-08-19T03:15:00Z",
-            "2019-08-19T03:30:00Z",
-            "2019-08-19T03:45:00Z",
-            "2019-08-19T04:00:00Z",
-            "2019-08-19T04:15:00Z",
-            "2019-08-19T04:30:00Z",
-            "2019-08-19T04:45:00Z",
-            "2019-08-19T05:00:00Z",
-            "2019-08-19T05:15:00Z",
-            "2019-08-19T05:30:00Z",
-            "2019-08-19T05:45:00Z",
-            "2019-08-19T06:00:00Z",
-            "2019-08-19T06:15:00Z",
-            "2019-08-19T06:30:00Z",
-            "2019-08-19T06:45:00Z",
-            "2019-08-19T07:00:00Z",
-            "2019-08-19T07:15:00Z",
-            "2019-08-19T07:30:00Z",
-            "2019-08-19T07:45:00Z",
-            "2019-08-19T08:00:00Z",
-            "2019-08-19T08:15:00Z",
-            "2019-08-19T08:30:00Z",
-            "2019-08-19T08:45:00Z",
-            "2019-08-19T09:00:00Z",
-            "2019-08-19T09:15:00Z",
-            "2019-08-19T09:30:00Z",
-            "2019-08-19T09:45:00Z",
-            "2019-08-19T10:00:00Z"
-        };
-
-        private int?[] _airflow =
-            {
-                100,
-                100,
-                100,
-                100,
-                150,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80
-            };
-
         #endregion
 
         public DashboardPage()
         {
             InitializeComponent();
 
-            UpdateGraphValues();
+            InitializeCommands();
+
+            NavigationPage.SetHasNavigationBar(this, false);
         }
 
-        protected override async void OnAppearing()
+        #region Methods
+
+        void InitializeCommands()
         {
-            base.OnAppearing();
-
-            await dashboardGraph.FadeTo(1, 2500);
-        }
-
-        private void InitGraphValues()
-        {
-            string dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-            _graphValues = new GraphValues();
-            _graphValues.Airflow = new List<GraphValueModel>();
-
-            for (int i = 0; i < _timeAsString.Length; i++)
+            // Show manual mode popup
+            roomView.ShowManualModeModalCommand = new Command<RoomView>(async (roomView) =>
             {
-                _graphValues.Airflow.Add(new GraphValueModel
+                await Navigation.PushPopupAsync(new ManualModeActivationPopup(roomView));
+            });
+
+            // Show sensor popup
+            roomView.ShowPopupForCommand = new Command<SensorType>(async (sensorType) =>
+            {
+                switch (sensorType)
                 {
-                    DateTime = DateTime.ParseExact(_timeAsString[i], dateFormat, CultureInfo.InvariantCulture),
-                    Value = _airflow[i] ?? 0,
-                });
-            }
-
-            // Check max airflow value, to determine graph scale
-            int maxAirflow = _graphValues.Airflow.Select(v => v.Value).Max();
-
-            if (maxAirflow <= 100)
-                _graphValues.Scale = 100;
-            else if (maxAirflow > 100 && maxAirflow <= 150)
-                _graphValues.Scale = 150;
-            else
-                _graphValues.Scale = 200;
-
-            // Events
-            _graphValues.Events = new List<GraphEventModel>();
-
-            var random = new Random();
-
-            _graphValues.Events.AddRange(
-                new List<GraphEventModel>
-                {
-                    new GraphEventModel
-                    {
-                        Icon = "CO2",
-                        Time = _graphValues.Airflow[random.Next(0, 41)].DateTime,
-                    },
-                    new GraphEventModel
-                    {
-                        Icon = "CO2",
-                        Time = _graphValues.Airflow[random.Next(0, 41)].DateTime,
-                    },
+                    case SensorType.Temperatue:
+                        break;
+                    case SensorType.H20:
+                        break;
+                    case SensorType.Voc:
+                        break;
+                    case SensorType.Co2:
+                        break;
+                    case SensorType.Airflow:
+                        break;
                 }
-            );
+            });
         }
 
-        private void UpdateGraphValues()
+        #endregion
+
+        #region Commands
+
+        async void ShowManualModePopup()
         {
-            InitGraphValues();
 
-            dashboardGraph.Values = _graphValues;
         }
 
-        void OnGraphTapped(object sender, EventArgs args)
-            => UpdateGraphValues();
+        async void SetProfile()
+        {
+
+        }
+
+        async void Boost()
+        {
+
+        }
+
+        #endregion
     }
 }

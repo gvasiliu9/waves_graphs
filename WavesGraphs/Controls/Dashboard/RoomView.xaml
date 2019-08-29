@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:WavesGraphs.Controls"
+    xmlns:modals="clr-namespace:WavesGraphs.Modals"
+    xmlns:helpers="clr-namespace:WavesGraphs.Helpers"
+    x:Class="WavesGraphs.Controls.RoomView">
+
+    <ContentView.Content>
+
+        <AbsoluteLayout>
+
+            <FlexLayout
+                x:Name="layout"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All"
+                Direction="Column"
+                JustifyContent="End">
+
+                <!--Top elements-->
+                <StackLayout
+                    x:Name="topElements"
+                    Margin="10, 0"
+                    FlexLayout.Grow="1">
+
+                    <!--Room name & profile-->
+                    <controls:RoomTitle
+                        x:Name="roomTitle"
+                        Icon="{x:Static helpers:IconsHelper.Bathroom}"
+                        Title="Bathroom"
+                        ProfileIcon="{x:Static helpers:IconsHelper.Heart}" />
+
+                    <!--Messages-->
+                    <StackLayout
+                        BindingContext="{x:Reference dashboardGraph}"
+                        Opacity="{Binding Path=Opacity}"
+                        IsVisible="{Binding Path=IsVisible}">
+
+                        <Label
+                            x:Name="message"
+                            Margin="0, 15"
+                            FontSize="Title"
+                            TextColor="White"
+                            FontAttributes="Bold" />
+
+                    </StackLayout>
+
+                </StackLayout>
+
+                <!--24H graph-->
+                <controls:DashboardGraph
+                    x:Name="dashboardGraph"
+                    FlexLayout.Basis="35%">
+
+                    <!--Gestures-->
+                    <controls:DashboardGraph.GestureRecognizers>
+
+                        <TapGestureRecognizer Tapped="OnGraphTapped" />
+
+                    </controls:DashboardGraph.GestureRecognizers>
+
+                </controls:DashboardGraph>
+
+                <!--Current status-->
+                <controls:CurrentStatus
+                    x:Name="currentStatus"
+                    Margin="5, 10, 5, 0" />
+
+            </FlexLayout>
+
+            <!--Modal-->
+            <modals:ManualModeModal
+                x:Name="manualModeModal"
+                IsVisible="False"
+                Opacity="0"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All"
+                Margin="5, 0" />
+
+        </AbsoluteLayout>
+
+    </ContentView.Content>
+
+</ContentView>

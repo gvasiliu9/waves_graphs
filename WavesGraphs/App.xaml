@@ -3,13 +3,14 @@
     xmlns="http://xamarin.com/schemas/2014/forms"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:controls="clr-namespace:WavesGraphs.Controls"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     x:Class="WavesGraphs.App">
 
-    <!--Icons font family-->
     <Application.Resources>
 
+        <!--Icons font family-->
         <Style TargetType="Label"
                x:Key="Icon">
 
@@ -20,7 +21,28 @@
                     <OnPlatform
                         x:TypeArguments="x:String"
                         iOS="Icons"
-                        Android="Icons.ttf#Icons"/>
+                        Android="Icons.ttf#Icons" />
+
+                </Setter.Value>
+
+            </Setter>
+
+        </Style>
+
+        <!--Dashboard icons size-->
+        <Style
+            x:Key="dashboardIcon"
+            TargetType="controls:IconButton">
+
+            <Setter
+                Property="ConstantFontSize">
+
+                <Setter.Value>
+
+                    <OnIdiom
+                        x:TypeArguments="x:Double"
+                        Phone="50"
+                        Tablet="75" />
 
                 </Setter.Value>
 

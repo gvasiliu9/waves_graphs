@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:skia="clr-namespace:SkiaSharp.Views.Forms;assembly=SkiaSharp.Views.Forms"
+    x:Class="WavesGraphs.Controls.FanBoostBar">
+
+    <!--Content-->
+    <ContentView.Content>
+        <!--Layout-->
+        <AbsoluteLayout
+            HorizontalOptions="FillAndExpand"
+            VerticalOptions="FillAndExpand"
+            SizeChanged="Layout_SizeChanged"
+            x:Name="layout">
+            <!--Current-->
+            <AbsoluteLayout
+                x:Name="currentValueLayout"
+                IsVisible="False"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 0.15"
+                AbsoluteLayout.LayoutFlags="All">
+                <FlexLayout
+                    Direction="Row"
+                    AlignItems="Center"
+                    JustifyContent="Start"
+                    AbsoluteLayout.LayoutFlags="PositionProportional"
+                    AbsoluteLayout.LayoutBounds="0, 0.5">
+                    <!--Current label-->
+                    <Label
+                        x:Name="currentLabel"
+                        Margin="10, 0, 0, 0"
+                        FontAttributes="Bold"
+                        TextColor="Gray"
+                        Text="Current" />
+                    <!--Line canvas-->
+                    <skia:SKCanvasView
+                        x:Name="currentCanvasView"
+                        FlexLayout.Grow="1"
+                        PaintSurface="CurrentCanvasView_PaintSurface" />
+                </FlexLayout>
+                <!--Boost label-->
+                <FlexLayout
+                    Padding="10, 0"
+                    AbsoluteLayout.LayoutBounds="1, 0, 1, 0.3"
+                    JustifyContent="End"
+                    AbsoluteLayout.LayoutFlags="All"
+                    Direction="Row"
+                    AlignItems="Center">
+                    <Label
+                        x:Name="boostLabelText"
+                        Text="Boost"
+                        FontAttributes="Bold" />
+                    <Label
+                        x:Name="boostLabelIcon"
+                        Text="  "
+                        Style="{StaticResource Icon}" />
+                </FlexLayout>
+                <!--Relax label-->
+                <FlexLayout
+                    Padding="10, 0"
+                    AbsoluteLayout.LayoutBounds="1, 1, 1, 0.3"
+                    JustifyContent="End"
+                    AbsoluteLayout.LayoutFlags="All"
+                    Direction="Row"
+                    AlignItems="Center">
+                    <Label
+                        x:Name="relaxLabelText"
+                        Text="Relax"
+                        FontAttributes="Bold" />
+                    <Label
+                        x:Name="relaxLabelIcon"
+                        Text="  "
+                        FontSize="Medium"
+                        FontFamily="{StaticResource Icon}" />
+                </FlexLayout>
+            </AbsoluteLayout>
+            <!--Text-->
+            <FlexLayout
+                x:Name="textValues"
+                Direction="Column"
+                Padding="0, 10"
+                AlignItems="Center"
+                JustifyContent="SpaceBetween"
+                SizeChanged="TextValues_SizeChanged"
+                AbsoluteLayout.LayoutBounds="0.275, 0, 0.25, 1"
+                AbsoluteLayout.LayoutFlags="All" />
+            <!--Bar container canvas-->
+            <!--Scale-->
+            <FlexLayout
+                x:Name="scale"
+                Direction="Column"
+                JustifyContent="SpaceBetween"
+                Padding="0, 30"
+                AbsoluteLayout.LayoutBounds="0.575, 0, 0.05, 1"
+                AbsoluteLayout.LayoutFlags="All" />
+            <skia:SKCanvasView
+                x:Name="barContainerCanvasView"
+                AbsoluteLayout.LayoutBounds="0.5, 0, 0.1, 1"
+                AbsoluteLayout.LayoutFlags="All"
+                PaintSurface="BarContainerCanvasView_PaintSurface" />
+            <!--Bar canvas-->
+            <skia:SKCanvasView
+                x:Name="barCanvasView"
+                AbsoluteLayout.LayoutBounds="0.5, 0, 0.1, 1"
+                AbsoluteLayout.LayoutFlags="All"
+                PaintSurface="BarCanvasView_PaintSurface"
+                SizeChanged="BarCanvasView_SizeChanged" />
+            <!--Slider-->
+            <Slider
+                x:Name="slider"
+                WidthRequest="200"
+                Rotation="-90"
+                AbsoluteLayout.LayoutBounds="0.5, 0.5"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                ValueChanged="Slider_ValueChanged" />
+            <!--Indicator container-->
+            <StackLayout
+                x:Name="indicatorContainer"
+                AbsoluteLayout.LayoutBounds="1, 0, 0.40, 1"
+                AbsoluteLayout.LayoutFlags="All">
+                <!--Indicator-->
+                <FlexLayout
+                    x:Name="indicator"
+                    JustifyContent="Start"
+                    AlignItems="Center">
+                    <!--Triangle-->
+                    <Label
+                        BindingContext="{x:Reference indicatorValueContainer}"
+                        Text=""
+                        TextColor="{Binding Path=BackgroundColor}"
+                        FontFamily="{StaticResource Icon}"
+                        Margin="0, 0, 0, 0"
+                        FontSize="Small" />
+                    <Frame
+                        x:Name="indicatorValueContainer"
+                        Padding="10, 5"
+                        CornerRadius="7"
+                        HasShadow="False"
+                        HorizontalOptions="StartAndExpand">
+                        <!--Indicator value-->
+                        <Label
+                            x:Name="indicatorValue"
+                            Text="0"
+                            TextColor="White"
+                            HorizontalTextAlignment="Center"
+                            FontAttributes="Bold" />
+                    </Frame>
+                </FlexLayout>
+            </StackLayout>
+        </AbsoluteLayout>
+    </ContentView.Content>
+</ContentView>

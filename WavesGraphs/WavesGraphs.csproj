@@ -16,6 +16,7 @@
     <PackageReference Include="SkiaSharp.Svg" Version="1.60.0" />
     <PackageReference Include="SkiaSharp.Extended" Version="1.60.0" />
     <PackageReference Include="TouchTracking.Forms" Version="1.1.0" />
+    <PackageReference Include="Rg.Plugins.Popup" Version="1.1.5.188" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="livesharp.rules" />
@@ -26,6 +27,7 @@
     <Compile Remove="Extensions\XamarinFormsMarkupExtensions.cs" />
     <Compile Remove="Controls\_4hGraph.cs" />
     <Compile Remove="Controls\Models\CanvasInfoModel.cs" />
+    <Compile Remove="Controls\Dashboard\Modal\ModalHeader.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -43,10 +45,13 @@
     <Folder Include="Controls\Models\History\" />
     <Folder Include="Controls\Models\Dashboard\" />
     <Folder Include="Models\Shared\" />
-    <Folder Include="Controls\Renderers\" />
+    <Folder Include="Controls\Buttons\" />
+    <Folder Include="Popups\" />
+    <Folder Include="Modals\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Controls\_4hGraph.xaml" />
+    <EmbeddedResource Remove="Controls\Navigation\PageTitle.xaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Fonts\Icons.ttf" />
@@ -55,6 +60,25 @@
     <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Controls\Dashboard\DashboardGraph.xaml.cs">
       <DependentUpon>DashboardGraph.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Controls\Dashboard\CurrentStatus.xaml.cs">
+      <DependentUpon>CurrentStatus.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Controls\Dashboard\CurrentStatusItem.xaml.cs">
+      <DependentUpon>CurrentStatusItem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Controls\Dashboard\Modal.xaml.cs">
+      <DependentUpon>Modal.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="Controls\Dashboard\RoomTitle.xaml.cs">
+      <DependentUpon>RoomTitle.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Controls\Dashboard\ModalHeader.xaml.cs">
+      <DependentUpon>ModalHeader.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
 </Project>

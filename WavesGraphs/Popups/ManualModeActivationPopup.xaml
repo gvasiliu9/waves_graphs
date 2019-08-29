@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rg.pages:PopupPage
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:rg.pages="clr-namespace:Rg.Plugins.Popup.Pages;assembly=Rg.Plugins.Popup"
+    xmlns:animations="clr-namespace:Rg.Plugins.Popup.Animations;assembly=Rg.Plugins.Popup"
+    xmlns:helpers="clr-namespace:WavesGraphs.Helpers"
+    xmlns:controls="clr-namespace:WavesGraphs.Controls"
+    x:Class="WavesGraphs.Popups.ManualModeActivationPopup">
+
+    <Grid>
+
+        <Grid.ColumnDefinitions>
+
+            <ColumnDefinition Width="10*" />
+            <ColumnDefinition Width="80*" />
+            <ColumnDefinition Width="10*" />
+
+        </Grid.ColumnDefinitions>
+
+        <!--Container-->
+        <StackLayout
+            Grid.Column="1"
+            Spacing="10"
+            VerticalOptions="CenterAndExpand"
+            BackgroundColor="White"
+            Padding="20, 15">
+
+            <!--Title-->
+            <Label
+                HorizontalTextAlignment="Center"
+                FontSize="Large"
+                FontAttributes="Bold"
+                TextColor="#494948"
+                Text="Manual mode" />
+
+            <!--Message-->
+            <Label
+                HorizontalTextAlignment="Center"
+                FontSize="Medium"
+                TextColor="#9C9C9C">
+
+                <Label.Text>
+                    Waves is an automated system, yet in certain situations you might want to control the ventilation manually. A certain ventilation rate and duration can be set in the room, independent on the detection of air quality. (Manual mode overrules all other settings)
+                </Label.Text>
+
+            </Label>
+
+            <!--Checkbox-->
+            <FlexLayout
+                JustifyContent="Center"
+                AlignItems="Center"
+                Direction="Row">
+
+                <CheckBox
+                    x:Name="checkbox"
+                    Color="#494948" />
+
+                <Label
+                    FontSize="Small"
+                    Text="Don't show me again" />
+
+            </FlexLayout>
+
+            <!--Buttons-->
+            <FlexLayout
+                Direction="Row">
+
+                <!--Cancel-->
+                <Button
+                    x:Name="cancelButton"
+                    Padding="10, 5"
+                    FlexLayout.Basis="50%"
+                    BackgroundColor="White"
+                    TextColor="#494948"
+                    FontSize="Medium"
+                    FontAttributes="Bold"
+                    Text="Cancel" />
+
+                <!--Activate-->
+                <Button
+                    x:Name="activateButton"
+                    CornerRadius="0"
+                    Padding="10, 5"
+                    FontSize="Medium"
+                    FlexLayout.Basis="50%"
+                    BackgroundColor="#494948"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    Text="Activate" />
+
+            </FlexLayout>
+
+        </StackLayout>
+
+    </Grid>
+
+</rg.pages:PopupPage>

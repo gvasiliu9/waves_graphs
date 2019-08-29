@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:WavesGraphs.Controls"
+    xmlns:helpers="clr-namespace:WavesGraphs.Helpers"
+    x:Class="WavesGraphs.Controls.RoomTitle">
+
+    <ContentView.Content>
+
+        <FlexLayout
+            AlignItems="Center"
+            JustifyContent="SpaceBetween"
+            Direction="Row">
+
+            <!--Hamburger-->
+            <controls:IconButton
+                x:Name="menu"
+                TextColor="White"
+                FontSize="Medium"
+                Text="{x:Static helpers:IconsHelper.Hamburger}" />
+
+            <!--Room name & icon-->
+            <StackLayout
+                Spacing="10"
+                HorizontalOptions="Start"
+                Orientation="Horizontal">
+
+                <!--Icon-->
+                <controls:IconButton
+                    x:Name="icon"
+                    VerticalOptions="CenterAndExpand"
+                    FontSize="Large"
+                    TextColor="White" />
+
+                <!--Room name-->
+                <Label
+                    x:Name="title"
+                    FontAttributes="Bold"
+                    VerticalTextAlignment="Center"
+                    FontSize="Medium"
+                    TextColor="White" />
+
+            </StackLayout>
+
+            <!--Profile-->
+            <controls:IconButton
+                x:Name="profile"
+                VerticalOptions="CenterAndExpand"
+                FontSize="Medium"
+                TextColor="White" />
+
+        </FlexLayout>
+
+    </ContentView.Content>
+
+</ContentView>

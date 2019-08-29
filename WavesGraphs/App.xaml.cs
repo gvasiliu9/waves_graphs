@@ -7,11 +7,13 @@ namespace WavesGraphs
 {
     public partial class App : Application
     {
+        public static int StatusBarHeight { get; set; }
+
         public App()
         {
             InitializeComponent();
 
-            MainPage = new HistoryPage();
+            MainPage = new NavigationPage(new DashboardPage());
         }
 
         protected override void OnStart()

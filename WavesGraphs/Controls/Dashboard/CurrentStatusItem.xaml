@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:WavesGraphs.Controls"
+    xmlns:helpers="clr-namespace:WavesGraphs.Helpers"
+    x:Class="WavesGraphs.Controls.CurrentStatusItem">
+
+    <ContentView.Content>
+
+        <StackLayout
+            Padding="10, 15"
+            Spacing="10"
+            Orientation="Horizontal"
+            BackgroundColor="White">
+
+            <!--Icon-->
+            <controls:IconButton
+                x:Name="icon"
+                TextColor="Red"
+                VerticalOptions="CenterAndExpand"
+                FontSize="Title"
+                Text="{x:Static helpers:IconsHelper.Co2Event}" />
+
+            <!--Name & Description-->
+            <StackLayout
+                x:Name="nameAndDescription"
+                Spacing="0">
+
+                <Label
+                    x:Name="name"
+                    FontSize="Large"
+                    FontAttributes="Bold"
+                    TextColor="#494948"
+                    Text="Temperature" />
+
+                <Label
+                    x:Name="description"
+                    FontSize="Small"
+                    TextColor="#333333"
+                    Text="Volatile Organic Components" />
+
+            </StackLayout>
+
+            <!--Result-->
+            <StackLayout
+                HorizontalOptions="EndAndExpand"
+                Spacing="0">
+
+                <!--Level-->
+                <Label
+                    x:Name="level"
+                    FontSize="Large"
+                    TextColor="Red"
+                    HorizontalTextAlignment="End"
+                    Text="High" />
+
+                <!--Value-->
+                <Label
+                    x:Name="value"
+                    FontSize="Small"
+                    TextColor="Red"
+                    HorizontalTextAlignment="End"
+                    Text="1250ppm" />
+
+            </StackLayout>
+
+        </StackLayout>
+
+    </ContentView.Content>
+
+</ContentView>
