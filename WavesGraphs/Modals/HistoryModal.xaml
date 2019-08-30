@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ContentView
+    xmlns="http://xamarin.com/schemas/2014/forms"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:helpers="clr-namespace:WavesGraphs.Helpers"
+    xmlns:controls="clr-namespace:WavesGraphs.Controls"
+    x:Class="WavesGraphs.Modals.HistoryModal">
+
+    <ContentView.Content>
+
+        <StackLayout
+            BackgroundColor="White">
+
+            <!--Header-->
+
+
+            <!--Graphs container-->
+            <Grid
+                VerticalOptions="FillAndExpand"
+                BackgroundColor="#E8E9E9">
+
+                <Grid.RowDefinitions>
+
+                    <RowDefinition Height="92*" />
+                    <RowDefinition Height="8*" />
+
+                </Grid.RowDefinitions>
+
+                <!--Graphs-->
+                <StackLayout
+                    x:Name="graphs"
+                    Margin="5,0" />
+
+                <!--Timeline-->
+                <controls:TimelineSlider
+                    x:Name="timelineSlider"
+                    BackgroundColor="White"
+                    Grid.Row="1" />
+
+            </Grid>
+
+        </StackLayout>
+
+    </ContentView.Content>
+
+</ContentView>

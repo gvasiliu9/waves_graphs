@@ -13,164 +13,12 @@ using WavesGraphs.Modals;
 using static WavesGraphs.Models.Dashboard.Enums;
 using System.Windows.Input;
 using System.Runtime.CompilerServices;
+using WavesGraphs.Models.History;
 
 namespace WavesGraphs.Controls
 {
     public partial class RoomView : ContentView
     {
-        #region Fields
-
-        Rectangle _modalBounds;
-
-        private GraphValues _graphValues;
-
-        private string[] _timeAsString = {
-            "2019-08-18T23:59:59Z",
-            "2019-08-19T00:00:00Z",
-            "2019-08-19T00:15:00Z",
-            "2019-08-19T00:30:00Z",
-            "2019-08-19T00:45:00Z",
-            "2019-08-19T01:00:00Z",
-            "2019-08-19T01:15:00Z",
-            "2019-08-19T01:30:00Z",
-            "2019-08-19T01:45:00Z",
-            "2019-08-19T02:00:00Z",
-            "2019-08-19T02:15:00Z",
-            "2019-08-19T02:30:00Z",
-            "2019-08-19T02:45:00Z",
-            "2019-08-19T03:00:00Z",
-            "2019-08-19T03:15:00Z",
-            "2019-08-19T03:30:00Z",
-            "2019-08-19T03:45:00Z",
-            "2019-08-19T04:00:00Z",
-            "2019-08-19T04:15:00Z",
-            "2019-08-19T04:30:00Z",
-            "2019-08-19T04:45:00Z",
-            "2019-08-19T05:00:00Z",
-            "2019-08-19T05:15:00Z",
-            "2019-08-19T05:30:00Z",
-            "2019-08-19T05:45:00Z",
-            "2019-08-19T06:00:00Z",
-            "2019-08-19T06:15:00Z",
-            "2019-08-19T06:30:00Z",
-            "2019-08-19T06:45:00Z",
-            "2019-08-19T07:00:00Z",
-            "2019-08-19T07:15:00Z",
-            "2019-08-19T07:30:00Z",
-            "2019-08-19T07:45:00Z",
-            "2019-08-19T08:00:00Z",
-            "2019-08-19T08:15:00Z",
-            "2019-08-19T08:30:00Z",
-            "2019-08-19T08:45:00Z",
-            "2019-08-19T09:00:00Z",
-            "2019-08-19T09:15:00Z",
-            "2019-08-19T09:30:00Z",
-            "2019-08-19T09:45:00Z",
-            "2019-08-19T10:00:00Z"
-        };
-
-        private int?[] _airflow =
-            {
-                100,
-                100,
-                100,
-                100,
-                150,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                84,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                100,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80,
-                80
-            };
-
-        #endregion
-
         #region Bindable Properties
 
         public static readonly BindableProperty ActivateManualModeProperty = BindableProperty
@@ -181,6 +29,36 @@ namespace WavesGraphs.Controls
             get => (bool)GetValue(ActivateManualModeProperty);
 
             set => SetValue(ActivateManualModeProperty, value);
+        }
+
+        public static readonly BindableProperty DashboardGraphValuesProperty = BindableProperty
+            .Create(nameof(DashboardGraphValues), typeof(DashboardGraphValuesModel), typeof(RoomView), default(DashboardGraphValuesModel));
+
+        public DashboardGraphValuesModel DashboardGraphValues
+        {
+            get => (DashboardGraphValuesModel)GetValue(DashboardGraphValuesProperty);
+
+            set => SetValue(DashboardGraphValuesProperty, value);
+        }
+
+        public static readonly BindableProperty DayGraphValuesProperty = BindableProperty
+            .Create(nameof(DayGraphValues), typeof(List<HistoryGraphValuesModel>), typeof(RoomView), default(List<HistoryGraphValuesModel>));
+
+        public List<HistoryGraphValuesModel> DayGraphValues
+        {
+            get => (List<HistoryGraphValuesModel>)GetValue(DayGraphValuesProperty);
+
+            set => SetValue(DayGraphValuesProperty, value);
+        }
+
+        public static readonly BindableProperty WeekGraphValuesProperty = BindableProperty
+            .Create(nameof(WeekGraphValues), typeof(List<HistoryGraphValuesModel>), typeof(RoomView), default(List<HistoryGraphValuesModel>));
+
+        public List<HistoryGraphValuesModel> WeekGraphValues
+        {
+            get => (List<HistoryGraphValuesModel>)GetValue(WeekGraphValuesProperty);
+
+            set => SetValue(WeekGraphValuesProperty, value);
         }
 
         #endregion
@@ -229,8 +107,6 @@ namespace WavesGraphs.Controls
         {
             InitializeComponent();
 
-            UpdateGraphValues();
-
             InitializeCommands();
 
             AddPagePaddingTop();
@@ -275,7 +151,7 @@ namespace WavesGraphs.Controls
 
         async void ShowHistoryModal()
         {
-
+            await ShowModal(historyModal);
         }
 
         #endregion
@@ -314,10 +190,7 @@ namespace WavesGraphs.Controls
             roomTitle.ShowProfileModalCommand = new Command(ShowProfileModal);
 
             // History
-            currentStatus.ShowHistoryModalCommand = new Command(async () =>
-            {
-                // Show history modal
-            });
+            currentStatus.ShowHistoryModalCommand = new Command(ShowHistoryModal);
 
             #endregion
 
@@ -388,68 +261,6 @@ namespace WavesGraphs.Controls
 
         #endregion
 
-        #region _24HGraph
-
-        private void InitGraphValues()
-        {
-            string dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-
-            _graphValues = new GraphValues();
-            _graphValues.Airflow = new List<GraphValueModel>();
-
-            for (int i = 0; i < _timeAsString.Length; i++)
-            {
-                _graphValues.Airflow.Add(new GraphValueModel
-                {
-                    DateTime = DateTime.ParseExact(_timeAsString[i], dateFormat, CultureInfo.InvariantCulture),
-                    Value = _airflow[i] ?? 0,
-                });
-            }
-
-            // Check max airflow value, to determine graph scale
-            int maxAirflow = _graphValues.Airflow.Select(v => v.Value).Max();
-
-            if (maxAirflow <= 100)
-                _graphValues.Scale = 100;
-            else if (maxAirflow > 100 && maxAirflow <= 150)
-                _graphValues.Scale = 150;
-            else
-                _graphValues.Scale = 200;
-
-            // Events
-            _graphValues.Events = new List<GraphEventModel>();
-
-            var random = new Random();
-
-            _graphValues.Events.AddRange(
-                new List<GraphEventModel>
-                {
-                    new GraphEventModel
-                    {
-                        Icon = "CO2",
-                        Time = _graphValues.Airflow[random.Next(0, 41)].DateTime,
-                    },
-                    new GraphEventModel
-                    {
-                        Icon = "CO2",
-                        Time = _graphValues.Airflow[random.Next(0, 41)].DateTime,
-                    },
-                }
-            );
-        }
-
-        private void UpdateGraphValues()
-        {
-            InitGraphValues();
-
-            dashboardGraph.Values = _graphValues;
-        }
-
-        void OnGraphTapped(object sender, EventArgs args)
-            => UpdateGraphValues();
-
-        #endregion
-
         #region Events
 
         protected override void OnPropertyChanged([CallerMemberName] string propertyName = null)
@@ -461,6 +272,24 @@ namespace WavesGraphs.Controls
             {
                 if (ActivateManualMode)
                     ShowManualModeModal();
+            }
+
+            // Dashboard graph values
+            if (propertyName == DashboardGraphValuesProperty.PropertyName)
+            {
+                dashboardGraph.Values = DashboardGraphValues;
+            }
+
+            // Day graph values
+            if (propertyName == DayGraphValuesProperty.PropertyName)
+            {
+                historyModal.DayGraphValues = DayGraphValues;
+            }
+
+            // Day graph values
+            if (propertyName == WeekGraphValuesProperty.PropertyName)
+            {
+                historyModal.WeekGraphValues = WeekGraphValues;
             }
         }
 

@@ -55,11 +55,11 @@ namespace WavesGraphs.Controls
         #region BindableProperties
 
         public static readonly BindableProperty ValuesProperty = BindableProperty
-            .Create(nameof(Values), typeof(GraphValues), typeof(DashboardGraph), default(GraphValues));
+            .Create(nameof(Values), typeof(DashboardGraphValuesModel), typeof(DashboardGraph), default(DashboardGraphValuesModel));
 
-        public GraphValues Values
+        public DashboardGraphValuesModel Values
         {
-            get => (GraphValues)GetValue(ValuesProperty);
+            get => (DashboardGraphValuesModel)GetValue(ValuesProperty);
 
             set => SetValue(ValuesProperty, value);
         }

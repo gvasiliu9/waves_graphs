@@ -7,7 +7,7 @@ namespace WavesGraphs.Models.Dashboard
     /// <summary>
     /// Store sensors values
     /// </summary>
-    public class GraphValues
+    public class DashboardGraphValuesModel
     {
         public int Scale { get; set; }
 

@@ -51,16 +51,7 @@
                 <!--24H graph-->
                 <controls:DashboardGraph
                     x:Name="dashboardGraph"
-                    FlexLayout.Basis="35%">
-
-                    <!--Gestures-->
-                    <controls:DashboardGraph.GestureRecognizers>
-
-                        <TapGestureRecognizer Tapped="OnGraphTapped" />
-
-                    </controls:DashboardGraph.GestureRecognizers>
-
-                </controls:DashboardGraph>
+                    FlexLayout.Basis="35%" />
 
                 <!--Current status-->
                 <controls:CurrentStatus
@@ -69,9 +60,18 @@
 
             </FlexLayout>
 
-            <!--Modal-->
+            <!--Manual mode modal-->
             <modals:ManualModeModal
                 x:Name="manualModeModal"
+                IsVisible="False"
+                Opacity="0"
+                AbsoluteLayout.LayoutBounds="0, 0, 1, 1"
+                AbsoluteLayout.LayoutFlags="All"
+                Margin="5, 0" />
+
+            <!--History modal-->
+            <modals:HistoryModal
+                x:Name="historyModal"
                 IsVisible="False"
                 Opacity="0"
                 AbsoluteLayout.LayoutBounds="0, 0, 1, 1"

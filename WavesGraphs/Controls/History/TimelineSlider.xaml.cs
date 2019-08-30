@@ -426,7 +426,7 @@ namespace WavesGraphs.Controls
             timelineSegment.Hours = Period;
 
             // Calculate step
-            _timeLineDraw.Step = _timeLineDraw.Bounds.Right / Period.Count();
+            _timeLineDraw.Step = _timeLineDraw.Bounds.Right / (Period?.Count() ?? 1);
 
             // Add timeline segment
             _timelineSegments.Add(timelineSegment);
@@ -440,7 +440,7 @@ namespace WavesGraphs.Controls
             point.Y = _timeLineDraw.Bounds.MidY;
 
             // Draw hours
-            foreach (DateTime hour in _timelineSegments.First().Hours)
+            foreach (DateTime hour in _timelineSegments.FirstOrDefault().Hours)
             {
                 if (hour.TimeOfDay.Ticks == 0)
                     DrawDayLine(point);
@@ -481,6 +481,9 @@ namespace WavesGraphs.Controls
             e.Surface.Canvas.Clear(SKColors.Transparent);
 
             Calculate(e);
+
+            if (Period == null)
+                return;
 
             DrawTimeline();
 
