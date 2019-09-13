@@ -13,7 +13,7 @@ namespace WavesGraphs
         {
             InitializeComponent();
 
-            MainPage = new NavigationPage(new DashboardPage());
+            MainPage = new NavigationPage(new RangeSlider());
         }
 
         protected override void OnStart()
